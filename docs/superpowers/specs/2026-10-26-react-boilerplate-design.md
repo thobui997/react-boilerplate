@@ -67,15 +67,16 @@ Hợp đồng mặc định giữ như repo gốc, nhưng được tách khỏi 
 ### 4.1 Tách cơ chế và hợp đồng (AuthAdapter)
 
 - **Cơ chế (cố định, có test, không sửa theo từng backend):** single-flight refresh, khóa liên tab, retry sau 401, token store, thứ tự guard, phát sự kiện session.
-- **Hợp đồng (đổi theo backend):** interface `AuthAdapter` trong `shared/api/auth/auth-adapter.ts`:
-  - `login(credentials)`, `refresh(refreshToken)`, `logout()`: gọi endpoint và trả về token.
-  - `mapSession(response)`: đọc session/người dùng từ response của backend.
-  - `shouldRefresh(error)`: lỗi nào được coi là hết hạn (mặc định 401).
-  - `tokenStorage`: nơi lưu token (mặc định: access in-memory, refresh localStorage; có thể thay bằng cookie httpOnly, khi đó adapter không cần token ở client).
-  - `refreshSupported`: `false` nếu backend chỉ có access token; cơ chế bỏ qua bước refresh.
-  - `onAuthError(error)`: hook cho các lỗi đặc thù, ví dụ 403 `PasswordChangeRequired` ở adapter mặc định.
-- `adapters/default.ts` hiện thực đúng hợp đồng hiện tại (Bearer + refresh token, lỗi RFC 7807). `auth.config.ts` chọn adapter đang dùng. Dự án mới đổi backend chỉ viết lại một file adapter.
-- **Ngoài khả năng của adapter** (phải thay cả module auth): OAuth/OIDC kiểu redirect, session cookie hoàn toàn do server quản lý. Ranh giới `AuthAdapter`/cơ chế được giữ sạch để thay module không chạm các phần còn lại. README ghi rõ giới hạn này.
+- **Hợp đồng (đổi theo backend):** interface `AuthAdapter` trong `shared/api/auth/auth-adapter.ts`. Mọi điểm chạm với hợp đồng backend đều đi qua adapter, không còn endpoint hay field nào hard-code ngoài nó:
+  - `login(client, credentials)`, `refresh(client, refreshToken)`, `logout(client, refreshToken)`: gọi endpoint, trả về token.
+  - `fetchCurrentUser(client, signal)`: gọi endpoint "người dùng hiện tại" và map response thành `AuthUser` chung (`id`, `username`, `displayName`, `role`, `permissions`, `mustChangePassword`).
+  - `unauthenticatedPaths`: các đường dẫn không gắn Bearer và không bao giờ kích hoạt refresh (mặc định `/auth/login`, `/auth/refresh`).
+  - `isRefreshTokenSpent(error)`: chính sách khi refresh thất bại, lỗi nào coi refresh token đã bị dùng/thu hồi nên phải kết thúc phiên (mặc định 401, lỗi mạng, 5xx). Đây là chính sách xoay token và phát hiện tái sử dụng của backend.
+  - `forbiddenRequiresPasswordChange(error)`: 403 nào nghĩa là bị ép đổi mật khẩu.
+  - `refreshSupported`: `false` nếu backend chỉ có access token. Khi đó phiên được giữ qua reload bằng cách lưu chính access token (token store lưu "credential dài hạn" = refresh token nếu có, ngược lại access token).
+- `adapters/default.ts` hiện thực đúng hợp đồng hiện tại (Bearer + refresh token xoay vòng, lỗi RFC 7807). `auth.config.ts` chọn adapter đang dùng. Dự án mới đổi backend chỉ viết lại một file adapter.
+- **Ngoài khả năng của adapter** (phải thay cả module auth): OAuth/OIDC kiểu redirect; session cookie hoặc refresh token httpOnly (cơ chế refresh cần đọc được refresh token từ JS để so sánh khi lấy khóa, phát hiện đăng xuất giữa chừng và hỗ trợ `hasSession`). Ranh giới `AuthAdapter`/cơ chế được giữ sạch để thay module không chạm các phần còn lại. README ghi rõ giới hạn này.
+- Lưu ý khi port: `nowMs`/`syncServerClock` của `ict-time` được thay bằng `Date.now()` (luật ESLint cấm `Date` bị tắt mặc định); chuỗi tiếng Việt trong `refresh-session`, `problem-json`, `normalize-error` và toast hết phiên chuyển vào `messages.vi.ts`; script theme inline trong `index.html` chuyển thành `public/theme-init.js` để CSP không cần `unsafe-inline` cho script; tiền tố khóa localStorage là hằng số `STORAGE_PREFIX` và có test canh sự đồng bộ với `public/theme-init.js`.
 
 - **Factory duy nhất** `createHttpClient(options)` trong `shared/api/http.ts`. Client chính và client refresh dùng chung timeout/interceptor nền (repo gốc lặp ở `http.ts` và `refresh-session.ts`). Client refresh không gắn auth để tránh vòng lặp 401.
 - **Auth interceptor:** gắn Bearer; khi 401 refresh đúng một lần rồi retry; cờ `skipAuthRefresh` để bỏ qua. Lỗi 403 `PasswordChangeRequired` phát sự kiện để điều hướng.
