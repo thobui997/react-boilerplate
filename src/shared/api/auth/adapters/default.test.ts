@@ -102,6 +102,15 @@ describe('defaultAdapter', () => {
   })
 
   test.each([
+    ['401 + unauthorized', apiError(401, 'unauthorized'), true],
+    ['401 không có thân lỗi (http_401)', apiError(401, 'http_401'), true],
+    ['401 + invalid_credentials', apiError(401, ApiErrorCode.InvalidCredentials), false],
+    ['403 + forbidden', apiError(403, ApiErrorCode.Forbidden), false],
+  ])('isAccessTokenRejected: %s -> %s', (_name, error, expected) => {
+    expect(defaultAdapter.isAccessTokenRejected(error)).toBe(expected)
+  })
+
+  test.each([
     ['403 + password_change_required', apiError(403, ApiErrorCode.PasswordChangeRequired), true],
     ['403 + forbidden', apiError(403, ApiErrorCode.Forbidden), false],
     ['401 + password_change_required', apiError(401, ApiErrorCode.PasswordChangeRequired), false],

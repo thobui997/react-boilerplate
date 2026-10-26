@@ -40,6 +40,10 @@ export interface AuthAdapter {
   logout(client: AxiosInstance, refreshToken: string | null): Promise<void>
   changePassword(client: AxiosInstance, input: ChangePasswordInput): Promise<void>
   fetchCurrentUser(client: AxiosInstance, signal?: AbortSignal): Promise<AuthUser>
+  // 401 này có nghĩa là access token bị từ chối (hết hạn/không hợp lệ → refresh hoặc kết thúc phiên), chứ không phải
+  // lỗi kiểm tra thông tin trên một phiên còn sống (vd. sai mật khẩu hiện tại khi đổi mật khẩu)? Trả false thì interceptor
+  // ném nguyên lỗi cho nơi gọi: không refresh, không kết thúc phiên, không gửi lại request.
+  isAccessTokenRejected(error: ApiError): boolean
   // Lỗi của lần refresh có nghĩa là refresh token đã hết dùng được (phải đăng nhập lại)?
   isRefreshTokenSpent(error: ApiError): boolean
   // 403 này có nghĩa là người dùng phải đổi mật khẩu trước khi tiếp tục?

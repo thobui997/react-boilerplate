@@ -49,6 +49,8 @@ export const accessOnlyAdapter: AuthAdapter = {
     return user
   },
 
+  // Backend này không có mã invalid_credentials để phân biệt: mọi 401 đều nghĩa là token bị từ chối.
+  isAccessTokenRejected: (error) => error.status === 401,
   isRefreshTokenSpent: () => true,
   forbiddenRequiresPasswordChange: () => false,
 }

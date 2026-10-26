@@ -109,7 +109,8 @@ Slice mẫu để chép: `entities/example-item` (dto → mapper → request →
 Cơ chế auth (Bearer, refresh single-flight, khóa liên tab, retry sau 401, token store, thứ tự guard, sự kiện phiên)
 không phụ thuộc backend. Mọi điểm chạm với hợp đồng backend đi qua interface `AuthAdapter`
 (`src/shared/api/auth/auth-adapter.ts`): `login`, `refresh`, `logout`, `changePassword`, `fetchCurrentUser` (map về
-`AuthUser`), `unauthenticatedPaths`, `refreshSupported`, `isRefreshTokenSpent`, `forbiddenRequiresPasswordChange`.
+`AuthUser`), `unauthenticatedPaths`, `refreshSupported`, `isAccessTokenRejected` (401 nào là token bị từ chối, khác
+lỗi kiểm tra thông tin như sai mật khẩu hiện tại), `isRefreshTokenSpent`, `forbiddenRequiresPasswordChange`.
 
 Đổi backend:
 

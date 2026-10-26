@@ -1,5 +1,5 @@
 import { http as mswHttp, HttpResponse } from 'msw'
-import { createHttpClient, defaultAdapter, type AuthAdapter } from '@/shared/api'
+import { ApiError, createHttpClient, defaultAdapter, type AuthAdapter } from '@/shared/api'
 import { server } from '@/test/msw/server'
 import { api } from '@/test/msw/api'
 import { accessOnlyAdapter } from './access-only-adapter'
@@ -47,6 +47,13 @@ const cases: Case[] = [
 describe.each(cases)('hợp đồng AuthAdapter: $name', ({ adapter, mock }) => {
   test('unauthenticatedPaths không rỗng', () => {
     expect(adapter.unauthenticatedPaths.length).toBeGreaterThan(0)
+  })
+
+  test('isAccessTokenRejected: 401 thông thường là token bị từ chối, 403 thì không', () => {
+    const error = (status: number) => new ApiError({ status, code: 'unauthorized', detail: 'x' })
+
+    expect(adapter.isAccessTokenRejected(error(401))).toBe(true)
+    expect(adapter.isAccessTokenRejected(error(403))).toBe(false)
   })
 
   test('login trả accessToken là chuỗi không rỗng', async () => {

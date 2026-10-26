@@ -1,4 +1,5 @@
 import { http as mswHttp, HttpResponse } from 'msw'
+import { api } from '@/test/msw/api'
 import { server } from '@/test/msw/server'
 import { STORAGE_KEYS } from '@/shared/config'
 import {
@@ -9,8 +10,8 @@ import {
   tokenStore,
 } from '@/shared/api'
 
-const DATA_URL = '/api/v1/data'
-const REFRESH_URL = '/api/v1/auth/refresh'
+const DATA_URL = api('/data')
+const REFRESH_URL = api('/auth/refresh')
 
 function refreshBody(accessToken: string, refreshToken: string) {
   return { accessToken, refreshToken }
@@ -98,7 +99,7 @@ describe('401 song song (RF 5)', () => {
       let refreshCalls = 0
       mockRefresh(() => refreshCalls++)
       server.use(
-        mswHttp.post(`/api/v1${path}`, ({ request }) =>
+        mswHttp.post(api(path), ({ request }) =>
           request.headers.get('Authorization') === 'Bearer new-access'
             ? new HttpResponse(null, { status: 204 })
             : HttpResponse.json(
@@ -145,12 +146,70 @@ describe('401 song song (RF 5)', () => {
   })
 })
 
+describe('khớp đường dẫn không cần xác thực theo ranh giới', () => {
+  test('/auth/login-history là đường dẫn cần xác thực: gắn Bearer và 401 thì refresh', async () => {
+    let refreshCalls = 0
+    const seenAuth: (string | null)[] = []
+    mockRefresh(() => refreshCalls++)
+    server.use(
+      mswHttp.get(api('/auth/login-history'), ({ request }) => {
+        const auth = request.headers.get('Authorization')
+        seenAuth.push(auth)
+        return auth === 'Bearer new-access'
+          ? HttpResponse.json({ ok: true })
+          : HttpResponse.json({ status: 401, code: 'unauthorized', detail: 'x' }, { status: 401 })
+      }),
+    )
+
+    const response = await http.get('/auth/login-history')
+
+    expect(response.status).toBe(200)
+    expect(seenAuth).toEqual(['Bearer old-access', 'Bearer new-access'])
+    expect(refreshCalls).toBe(1)
+  })
+
+  test('/auth/login?x=1 vẫn là đường dẫn không cần xác thực: không Bearer, 401 không refresh', async () => {
+    let refreshCalls = 0
+    const seenAuth: (string | null)[] = []
+    mockRefresh(() => refreshCalls++)
+    server.use(
+      mswHttp.post(api('/auth/login'), ({ request }) => {
+        seenAuth.push(request.headers.get('Authorization'))
+        return HttpResponse.json({ status: 401, code: 'x', detail: 'x' }, { status: 401 })
+      }),
+    )
+
+    const error = await http.post('/auth/login?x=1', {}).catch((e: unknown) => e)
+
+    expect(error).toMatchObject({ status: 401 })
+    expect(seenAuth).toEqual([null])
+    expect(refreshCalls).toBe(0)
+  })
+})
+
+test('401 không có thân lỗi (không có code) vẫn được coi là token bị từ chối: refresh rồi retry', async () => {
+  let refreshCalls = 0
+  mockRefresh(() => refreshCalls++)
+  server.use(
+    mswHttp.get(DATA_URL, ({ request }) =>
+      request.headers.get('Authorization') === 'Bearer new-access'
+        ? HttpResponse.json({ ok: true })
+        : new HttpResponse(null, { status: 401 }),
+    ),
+  )
+
+  const response = await http.get('/data')
+
+  expect(response.status).toBe(200)
+  expect(refreshCalls).toBe(1)
+})
+
 describe('không kích hoạt refresh', () => {
   test.each(['/auth/login', '/auth/refresh'])('401 ở %s', async (path) => {
     let refreshCalls = 0
     mockRefresh(() => refreshCalls++)
     server.use(
-      mswHttp.post(`/api/v1${path}`, () =>
+      mswHttp.post(api(path), () =>
         HttpResponse.json(
           { status: 401, code: 'invalid_credentials', detail: 'Sai.' },
           { status: 401 },

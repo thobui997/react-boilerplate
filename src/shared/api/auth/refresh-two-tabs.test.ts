@@ -1,4 +1,5 @@
 import { http as mswHttp, HttpResponse } from 'msw'
+import { api } from '@/test/msw/api'
 import { server } from '@/test/msw/server'
 import { STORAGE_KEYS } from '@/shared/config'
 
@@ -37,7 +38,7 @@ describe('hai tab refresh đồng thời (RF 5)', () => {
       localStorage.setItem(STORAGE_KEYS.Session, 'r0')
       let refreshCalls = 0
       server.use(
-        mswHttp.post('/api/v1/auth/refresh', async () => {
+        mswHttp.post(api('/auth/refresh'), async () => {
           refreshCalls++
           await new Promise((resolve) => setTimeout(resolve, 30))
           return HttpResponse.json({ accessToken: 'a1', refreshToken: 'r1' })
@@ -61,7 +62,7 @@ test('hai lần refreshSession trong cùng tab chia sẻ một request (single-f
   localStorage.setItem(STORAGE_KEYS.Session, 'r0')
   let refreshCalls = 0
   server.use(
-    mswHttp.post('/api/v1/auth/refresh', async () => {
+    mswHttp.post(api('/auth/refresh'), async () => {
       refreshCalls++
       await new Promise((resolve) => setTimeout(resolve, 30))
       return HttpResponse.json({ accessToken: 'a1', refreshToken: 'r1' })
@@ -77,7 +78,7 @@ test('hai lần refreshSession trong cùng tab chia sẻ một request (single-f
 test('tab khác được báo hết phiên khi một tab bị từ chối refresh', async () => {
   localStorage.setItem(STORAGE_KEYS.Session, 'r0')
   server.use(
-    mswHttp.post('/api/v1/auth/refresh', () =>
+    mswHttp.post(api('/auth/refresh'), () =>
       HttpResponse.json(
         { status: 401, code: 'refresh_reuse_detected', detail: 'Phiên không hợp lệ.' },
         { status: 401 },

@@ -1,4 +1,4 @@
-import type { AxiosError, AxiosInstance } from 'axios'
+import type { AxiosError, AxiosInstance, AxiosResponse } from 'axios'
 import { ApiError } from '../api-error'
 import { HttpStatus } from '../error-codes'
 import { readProblem } from '../problem-json'
@@ -12,8 +12,17 @@ function bearer(token: string): string {
 }
 
 // Đường dẫn không cần xác thực (đăng nhập, refresh…): không gắn Bearer và 401 không kích hoạt refresh.
+// Khớp đúng đường dẫn hoặc theo ranh giới (`/`, `?`, `#`): `/auth/login` không được khớp `/auth/login-history`.
 function isUnauthenticatedPath(url: string | undefined): boolean {
-  return getAuthAdapter().unauthenticatedPaths.some((path) => url?.startsWith(path))
+  if (!url) return false
+  return getAuthAdapter().unauthenticatedPaths.some(
+    (path) => url === path || (url.startsWith(path) && '/?#'.includes(url.charAt(path.length))),
+  )
+}
+
+// Interceptor này chạy trước bộ chuẩn hoá lỗi nên tự dựng ApiError để hỏi adapter.
+function problemError(response: AxiosResponse): ApiError {
+  return new ApiError({ status: response.status, ...readProblem(response.data, response.status) })
 }
 
 async function handleAuthError(client: AxiosInstance, error: AxiosError): Promise<unknown> {
@@ -23,12 +32,9 @@ async function handleAuthError(client: AxiosInstance, error: AxiosError): Promis
   const adapter = getAuthAdapter()
 
   if (response.status === HttpStatus.Forbidden) {
-    // Interceptor này chạy trước bộ chuẩn hoá lỗi nên tự dựng ApiError để hỏi adapter.
-    const apiError = new ApiError({
-      status: response.status,
-      ...readProblem(response.data, response.status),
-    })
-    if (adapter.forbiddenRequiresPasswordChange(apiError)) emitPasswordChangeRequired()
+    if (adapter.forbiddenRequiresPasswordChange(problemError(response))) {
+      emitPasswordChangeRequired()
+    }
     throw error
   }
 
@@ -41,18 +47,24 @@ async function handleAuthError(client: AxiosInstance, error: AxiosError): Promis
     tokenStore.hasSession()
   if (!isRefreshable) throw error
 
-  // Backend không có refresh token: 401 nghĩa là phiên đã hết, không có cách nào làm mới.
+  // 401 của bước kiểm tra thông tin (vd. sai mật khẩu hiện tại) trên phiên còn sống: trả nguyên lỗi, không refresh,
+  // không kết thúc phiên và không gửi lại request (gửi lại sẽ tính thêm một lần sai vào giới hạn của server).
+  if (!adapter.isAccessTokenRejected(problemError(response))) throw error
+
+  config._retry = true
+  // Request đi bằng token cũ nhưng phiên đã được làm mới/thay trong lúc chờ: retry ngay bằng token hiện tại.
+  const current = tokenStore.getAccess()
+  const sentWithStaleToken = !!current && config.headers.get('Authorization') !== bearer(current)
+
+  // Backend không có refresh token: 401 của token hiện tại nghĩa là phiên đã hết, không có cách nào làm mới.
   if (!adapter.refreshSupported) {
+    if (sentWithStaleToken) return client.request(config)
     expireSession()
     throw error
   }
 
-  config._retry = true
-  // Request đi bằng token cũ nhưng phiên đã được làm mới trong lúc chờ: retry ngay, không xoay token thêm lần nữa.
-  const current = tokenStore.getAccess()
-  const needsRefresh = !current || config.headers.get('Authorization') === bearer(current)
   try {
-    if (needsRefresh) await refreshSession()
+    if (!sentWithStaleToken) await refreshSession()
   } catch (refreshError) {
     // Hết phiên đã được phát qua onSessionExpired. Lỗi mạng thì báo đúng là lỗi mạng (để UI hiện banner ngoại tuyến).
     throw refreshError instanceof ApiError && refreshError.isNetwork ? refreshError : error

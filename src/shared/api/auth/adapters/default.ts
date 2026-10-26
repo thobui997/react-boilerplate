@@ -64,6 +64,13 @@ export const defaultAdapter: AuthAdapter = {
     return user
   },
 
+  // 401 invalid_credentials là sai thông tin (vd. mật khẩu hiện tại), phiên vẫn còn sống.
+  isAccessTokenRejected(error: ApiError) {
+    return (
+      error.status === HttpStatus.Unauthorized && error.code !== ApiErrorCode.InvalidCredentials
+    )
+  },
+
   // 429 và 4xx khác là lỗi tạm hoặc lỗi request, chưa kết luận được token đã hỏng.
   isRefreshTokenSpent(error: ApiError) {
     return (

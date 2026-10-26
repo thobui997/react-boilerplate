@@ -1,10 +1,11 @@
 import { http as mswHttp, HttpResponse } from 'msw'
+import { api } from '@/test/msw/api'
 import { server } from '@/test/msw/server'
 import { STORAGE_KEYS } from '@/shared/config'
 import { http, onSessionExpired, refreshSession, tokenStore } from '@/shared/api'
 
-const DATA_URL = '/api/v1/data'
-const REFRESH_URL = '/api/v1/auth/refresh'
+const DATA_URL = api('/data')
+const REFRESH_URL = api('/auth/refresh')
 
 function unauthorized() {
   return HttpResponse.json({ status: 401, code: 'unauthorized', detail: 'x' }, { status: 401 })
