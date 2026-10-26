@@ -1,0 +1,23 @@
+# Ngữ cảnh build cần mã nguồn, cấu hình, e2e/ và scripts/ (tsc -b kiểm cả hai, xem tsconfig.json).
+node_modules/
+dist/
+dev-dist/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+.git/
+.github/
+.worktrees/
+.superpowers/
+.claude/
+.codegraph/
+.vs/
+.idea/
+.vscode/
+docs/
+.env
+.env.*
+*.local
+Dockerfile
+.dockerignore

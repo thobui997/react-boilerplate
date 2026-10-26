@@ -1,0 +1,44 @@
+name: CI
+
+# Kiểm tra chất lượng cho nhánh chính (push) và mọi pull request.
+# Chỉ kiểm tra: không phát hành, không E2E (cần API thật), không dùng secret.
+
+on:
+  push:
+    # đổi nhánh kích hoạt ở đây
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node (theo .nvmrc)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint (ESLint + Steiger)
+        run: npm run lint
+
+      - name: Format
+        run: npm run format:check
+
+      - name: Test
+        run: npm run test
+
+      - name: Build
+        run: npm run build
