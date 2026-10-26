@@ -35,6 +35,8 @@ export interface AuthAdapter {
   unauthenticatedPaths: readonly string[]
   login(client: AxiosInstance, credentials: Credentials): Promise<AuthTokens>
   refresh(client: AxiosInstance, refreshToken: string): Promise<AuthTokens>
+  // Request đăng xuất PHẢI gửi kèm `{ skipAuthRefresh: true }`: 401 lúc đăng xuất không được refresh (sinh token mới
+  // vừa bị bỏ lại) hay kết thúc phiên (phát onSessionExpired cho một lần đăng xuất tự nguyện).
   logout(client: AxiosInstance, refreshToken: string | null): Promise<void>
   changePassword(client: AxiosInstance, input: ChangePasswordInput): Promise<void>
   fetchCurrentUser(client: AxiosInstance, signal?: AbortSignal): Promise<AuthUser>

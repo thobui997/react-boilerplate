@@ -26,7 +26,7 @@ export const accessOnlyAdapter: AuthAdapter = {
   },
 
   async logout(client) {
-    await client.post('/session/end')
+    await client.post('/session/end', undefined, { skipAuthRefresh: true })
   },
 
   async changePassword(client, input) {
