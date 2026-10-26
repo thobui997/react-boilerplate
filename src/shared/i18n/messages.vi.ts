@@ -13,6 +13,12 @@ export const messages = {
     action: 'Đăng xuất',
   },
   changePassword: {
+    page: {
+      eyebrow: 'Bước bắt buộc · lần đăng nhập đầu',
+      title: 'Đổi mật khẩu tạm',
+      reminder: (displayName: string) =>
+        `${displayName} cần đặt mật khẩu riêng trước khi dùng ứng dụng.`,
+    },
     currentRequired: 'Cần nhập mật khẩu hiện tại',
     failed: 'Không đổi được mật khẩu. Thử lại sau.',
     labels: {
@@ -52,6 +58,25 @@ export const messages = {
   },
   nav: {
     settings: 'Cài đặt',
+  },
+  settings: {
+    title: 'Cài đặt',
+    profile: {
+      title: 'Hồ sơ',
+      role: (role: string) => `Vai trò: ${role}`,
+    },
+    appearance: {
+      title: 'Giao diện',
+    },
+    password: {
+      title: 'Mật khẩu',
+      open: 'Đổi mật khẩu',
+      changed: 'Đã đổi mật khẩu',
+    },
+    account: {
+      title: 'Tài khoản',
+      signOutLabel: 'Đăng xuất tài khoản',
+    },
   },
   login: {
     title: 'Đăng nhập',

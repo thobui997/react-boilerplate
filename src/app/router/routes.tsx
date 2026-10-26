@@ -1,6 +1,7 @@
 import type { QueryClient } from '@tanstack/react-query'
 import type { RouteObject } from 'react-router'
 import { AppShell } from '@/app/layouts/app-shell'
+import { NotFoundPage } from '@/pages/not-found'
 import { ROUTES } from '@/shared/config'
 import { HydrateFallback } from './hydrate-fallback'
 import { createLoaders } from './loaders'
@@ -19,10 +20,11 @@ export function createRoutes({ queryClient }: { queryClient: QueryClient }): Rou
     },
     {
       // Phải là route riêng ngoài khung: nếu rơi vào `*` dưới `/`, sessionLoader lại chuyển về đây và lặp vô hạn.
-      // Tạm hiện trang không tìm thấy; Task 12 thay bằng ChangePasswordPage.
       path: ROUTES.ChangePassword,
       loader: loaders.changePasswordLoader,
-      lazy: async () => ({ Component: (await import('@/pages/not-found')).NotFoundPage }),
+      lazy: async () => ({
+        Component: (await import('@/pages/change-password')).ChangePasswordPage,
+      }),
       hydrateFallbackElement: <HydrateFallback />,
       errorElement: <RouteErrorBoundary />,
     },
@@ -40,11 +42,13 @@ export function createRoutes({ queryClient }: { queryClient: QueryClient }): Rou
           children: [
             // Trang gốc chỉ chuyển hướng tới trang đích theo quyền.
             { index: true, loader: loaders.homeLoader },
-            // Route con của trang (có `loader: loaders.guard({ ... })` khi cần quyền) thêm vào đây.
+            // Không có `requires`: đây là đích hạ cánh an toàn của landingPathFor (xem entities/session).
             {
-              path: '*',
-              lazy: async () => ({ Component: (await import('@/pages/not-found')).NotFoundPage }),
+              path: ROUTES.Settings,
+              lazy: async () => ({ Component: (await import('@/pages/settings')).SettingsPage }),
             },
+            // Route con của trang (có `loader: loaders.guard({ ... })` khi cần quyền) thêm vào đây.
+            { path: '*', Component: NotFoundPage },
           ],
         },
       ],

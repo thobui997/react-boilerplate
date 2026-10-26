@@ -25,7 +25,7 @@ test('thanh điều hướng hiện các mục mà navItemsFor cho phép', async
 test('liên kết của route hiện tại có aria-current="page"', async () => {
   renderRoute(ROUTES.Settings)
 
-  await screen.findByRole('heading', { name: 'Không tìm thấy trang' })
+  await screen.findByRole('heading', { level: 1, name: 'Cài đặt' })
   expect(within(mainNav()).getByRole('link', { name: 'Cài đặt' })).toHaveAttribute(
     'aria-current',
     'page',
