@@ -102,6 +102,23 @@ describe.each(cases)('interceptor auth theo hợp đồng AuthAdapter: $name', (
     expect(tokenStore.hasSession()).toBe(true)
   })
 
+  test('request tới unauthenticatedPaths không gắn Bearer, đường dẫn thường thì có', async () => {
+    const seen: Record<string, string | null> = {}
+    for (const path of [...adapter.unauthenticatedPaths, '/data']) {
+      server.use(
+        mswHttp.post(api(path), ({ request }) => {
+          seen[path] = request.headers.get('Authorization')
+          return HttpResponse.json({ token: 't', accessToken: 't', refreshToken: 'r' })
+        }),
+      )
+
+      await http.post(path, {})
+    }
+
+    for (const path of adapter.unauthenticatedPaths) expect(seen[path]).toBeNull()
+    expect(seen['/data']).toBe('Bearer old-access')
+  })
+
   test('401 ở đường dẫn thường: refresh rồi retry nếu adapter hỗ trợ, ngược lại kết thúc phiên', async () => {
     server.use(
       mswHttp.get(api('/data'), ({ request }) =>

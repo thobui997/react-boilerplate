@@ -11,6 +11,11 @@ function bearer(token: string): string {
   return `Bearer ${token}`
 }
 
+// Đường dẫn không cần xác thực (đăng nhập, refresh…): không gắn Bearer và 401 không kích hoạt refresh.
+function isUnauthenticatedPath(url: string | undefined): boolean {
+  return getAuthAdapter().unauthenticatedPaths.some((path) => url?.startsWith(path))
+}
+
 async function handleAuthError(client: AxiosInstance, error: AxiosError): Promise<unknown> {
   const { response, config } = error
   if (!response || !config) throw error
@@ -32,7 +37,7 @@ async function handleAuthError(client: AxiosInstance, error: AxiosError): Promis
     response.status === HttpStatus.Unauthorized &&
     !config._retry &&
     !config.skipAuthRefresh &&
-    !adapter.unauthenticatedPaths.some((path) => config.url?.startsWith(path)) &&
+    !isUnauthenticatedPath(config.url) &&
     tokenStore.hasSession()
   if (!isRefreshable) throw error
 
@@ -57,6 +62,7 @@ async function handleAuthError(client: AxiosInstance, error: AxiosError): Promis
 
 export function installAuth(client: AxiosInstance): void {
   client.interceptors.request.use((config) => {
+    if (isUnauthenticatedPath(config.url)) return config
     const access = tokenStore.getAccess()
     if (access) config.headers.set('Authorization', bearer(access))
     return config
