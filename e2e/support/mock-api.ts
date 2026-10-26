@@ -31,14 +31,20 @@ const exampleItems = [
 ]
 // </example-item>
 
+// Cùng biến với dev server (Vite đọc VITE_API_BASE từ môi trường hoặc `.env`; playwright.config.ts nạp `.env` vào
+// process.env) để route giả lập khớp với URL mà app thật gọi. Mặc định giống src/shared/config/env.ts.
+const API_BASE = (process.env.VITE_API_BASE || '/api/v1').replace(/\/+$/, '')
+const API_PATH = new URL(API_BASE, 'http://localhost').pathname
+const API_PATTERN = /^https?:\/\//.test(API_BASE) ? `${API_BASE}/**` : `**${API_PATH}/**`
+
 const json = (route: Route, body: unknown, status = 200) =>
   route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) })
 
 // Giả lập API mặc định của template để E2E chạy không cần backend.
 export async function mockApi(page: Page): Promise<void> {
-  await page.route('**/api/v1/**', (route) => {
+  await page.route(API_PATTERN, (route) => {
     const request = route.request()
-    const path = new URL(request.url()).pathname.replace(/^\/api\/v1/, '')
+    const path = new URL(request.url()).pathname.slice(API_PATH.length)
     const method = request.method()
 
     if (method === 'POST' && path === '/auth/login') {
