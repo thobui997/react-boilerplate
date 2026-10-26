@@ -19,3 +19,6 @@ test-results/
 .DS_Store
 *.log
 .vs
+
+# Claude Code: cấu hình cục bộ của từng máy (luật chung ở .claude/rules/ được theo dõi)
+.claude/settings.local.json
