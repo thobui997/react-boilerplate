@@ -1,0 +1,22 @@
+# Node / build
+node_modules/
+dist/
+dev-dist/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Biến môi trường cục bộ (secret, ghi đè); chỉ .env.example được theo dõi
+.env
+.env.*
+!.env.example
+*.local
+
+# IDE / hệ điều hành / log
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+*.log
+.vs
