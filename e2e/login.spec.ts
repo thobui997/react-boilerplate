@@ -23,6 +23,6 @@ test('đăng nhập thành công tới danh sách mẫu rồi đăng xuất về
   await expect(page.getByRole('cell', { name: 'Mục A' })).toBeVisible()
   // </example-item>
 
-  await page.getByRole('button', { name: messages.signOut.action }).click()
+  await page.getByRole('button', { name: messages.signOut.action, exact: true }).click()
   await expect(page).toHaveURL(/\/login/)
 })
