@@ -40,4 +40,44 @@ export const messages = {
   theme: {
     dark: 'Chế độ tối',
   },
+  routeError: {
+    title: 'Có lỗi xảy ra',
+    fallback: 'Không mở được trang này. Thử lại, nếu vẫn lỗi hãy báo cho người quản trị.',
+    retry: 'Thử lại',
+  },
+  shell: {
+    loading: 'Đang tải…',
+    loadingLabel: 'Đang tải ứng dụng',
+    mainNav: 'Điều hướng chính',
+  },
+  nav: {
+    settings: 'Cài đặt',
+  },
+  login: {
+    title: 'Đăng nhập',
+    username: 'Tên đăng nhập',
+    usernamePlaceholder: 'Ví dụ: an.nv',
+    usernameRequired: 'Cần nhập tên đăng nhập',
+    password: 'Mật khẩu',
+    passwordRequired: 'Cần nhập mật khẩu',
+    submit: 'Đăng nhập',
+    submitting: 'Đang đăng nhập…',
+    forgotPassword: 'Quên mật khẩu: liên hệ quản trị viên để được cấp mật khẩu tạm.',
+    passwordChanged: 'Đã đổi mật khẩu, hãy đăng nhập lại',
+    errors: {
+      networkTitle: 'Không có kết nối mạng',
+      networkMessage: 'Cần có mạng để đăng nhập.',
+      invalidCredentialsTitle: 'Sai tên đăng nhập hoặc mật khẩu',
+      invalidCredentialsMessage: 'Kiểm tra lại chữ hoa, chữ thường và bộ gõ tiếng Việt.',
+      tooManyRequestsTitle: 'Thử đăng nhập quá nhiều lần',
+      retryAfter: (seconds: number) => `Thử lại sau ${seconds} giây.`,
+      retryLater: 'Chờ một lúc rồi thử lại.',
+      failedTitle: 'Không đăng nhập được',
+    },
+  },
+  notFound: {
+    title: 'Không tìm thấy trang',
+    description: 'Đường dẫn này không có hoặc đã bị đổi.',
+    backHome: 'Về trang chủ',
+  },
 } as const
