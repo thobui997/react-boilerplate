@@ -6,7 +6,7 @@
 
 **Architecture:** Feature-Sliced Design (app / pages / features / entities / shared, không có widgets). Cơ chế auth (single-flight refresh, khóa liên tab, retry 401, token store) tách khỏi hợp đồng backend qua interface `AuthAdapter`; adapter mặc định = hợp đồng hiện tại. Mọi chuỗi UI chung nằm trong `shared/i18n/messages.vi.ts`.
 
-**Tech Stack:** Vite, React 19, TypeScript strict, React Router 7 (data router), TanStack Query, axios, react-hook-form + zod, Tailwind 4 + shadcn/Base UI, Vitest + jsdom + MSW + Testing Library, Playwright, ESLint 10 flat, Prettier, Steiger, Docker + nginx.
+**Tech Stack:** Vite, React 19, TypeScript strict, React Router 7 (data router), TanStack Query, axios, react-hook-form + zod, Tailwind 4 (không kèm thư viện UI; dự án tự thêm qua `shadcn` CLI), Vitest + jsdom + MSW + Testing Library, Playwright, ESLint 10 flat, Prettier, Steiger, Docker + nginx.
 
 **Spec:** `docs/superpowers/specs/2026-10-26-react-boilerplate-design.md` (executor đọc cả spec lẫn plan).
 
@@ -16,7 +16,7 @@
 
 - Repo: `/home/tho-bui/Documents/projects/react-boilerplate`, nhánh `main`. Package manager npm; lần cài đầu dùng `npm install` (chưa có lockfile) rồi commit `package-lock.json`.
 - Node `>=22.13` trong `engines`; `.nvmrc` = `22`.
-- Phiên bản dependency: **copy nguyên văn số phiên bản (pin cứng, không `^`) từ `$SRC/package.json`**; bỏ `dayjs`, `react-day-picker`, `vite-plugin-pwa`, `@vite-pwa/assets-generator`, mọi `workbox-*`. Kiểm tra peer range của `steiger@0.7.0` với `@feature-sliced/steiger-plugin@0.8.0` khi cài.
+- Phiên bản dependency: **copy nguyên văn số phiên bản (pin cứng, không `^`) từ `$SRC/package.json`**; bỏ `dayjs`, `react-day-picker`, `vite-plugin-pwa`, `@vite-pwa/assets-generator`, mọi `workbox-*`, và (vì template không có thư viện UI) `@base-ui/react`, `class-variance-authority`, `lucide-react`. Giữ `tailwindcss`, `@tailwindcss/vite`, `clsx`, `tailwind-merge` (cho `cn`). Kiểm tra peer range của `steiger@0.7.0` với `@feature-sliced/steiger-plugin@0.8.0` khi cài.
 - `tsconfig.json`: `strict`, `noUnusedLocals`, `noUnusedParameters`, `noFallthroughCasesInSwitch`, `noUncheckedSideEffectImports`, `isolatedModules`, `verbatimModuleSyntax`, `skipLibCheck`, `noEmit`, alias `@/*` → `./src/*` (đồng bộ trong `vite.config.ts`).
 - Prettier: không dấu chấm phẩy, nháy đơn, `trailingComma: all`, `printWidth: 100`, plugin `prettier-plugin-tailwindcss`.
 - ESLint: `max-lines` 300, `react-hooks/exhaustive-deps` là `error`, cấm import file `**/api/dto`, `**/api/**/dto`, `**/api/*-dto` ngoài `api/` của chính slice. Luật cấm `new Date`/`Date.now`/`dayjs` của `$SRC` **không bật** (để dạng comment mẫu).
@@ -26,6 +26,7 @@
 - Khóa localStorage dùng tiền tố hằng số `STORAGE_PREFIX = 'app'` (`app:session`, `app:session-lock`, `app:theme`); `AUTH_CHANNEL = 'app-auth'`; `REFRESH_LOCK_NAME = 'app-refresh'`.
 - Env: chỉ `VITE_API_BASE` (mặc định `/api/v1`) và `VITE_DEV_API_TARGET` (dev proxy, mặc định `http://127.0.0.1:8080`). Không có biến domain.
 - Không PWA/service worker, không husky/commitlint/lint-staged, không thư viện i18n, không đồng bộ đồng hồ server (`Date.now()` thay `nowMs`).
+- **Không có lớp UI dựng sẵn**: không `src/shared/ui`, không thư viện component/icon/toast, không `theme.css`, không guard test của Base UI. Mọi trang, shell và `ui/` của feature chỉ dùng HTML ngữ nghĩa thuần (`main`, `header`, `nav`, `form`, `label`, `input`, `button`, `table`, `p role="alert"`), **không gắn class Tailwind hay style**. Thông báo đi qua cổng `notify` (`shared/lib/notify`); xác nhận hành động nguy hiểm dùng `window.confirm`. `components.json` (aliases `@/shared/ui`, `@/shared/lib/cn`) được giữ để dự án chạy `npx shadcn@latest add …` khi cần; thư mục `shared/ui` do dự án tự tạo.
 - Không từ khóa domain trong repo (trừ `docs/superpowers/`): `police`, `commune`, `bcx`, `Công an`, `ict-time`, `VITE_UNIT_NAME`, `báo cáo ngày`.
 - Test đặt cạnh code (`*.test.ts[x]`); test hạ tầng chung ở `src/test/`.
 - Mỗi task kết thúc bằng một commit; thông điệp theo `type: mô tả`.
@@ -54,7 +55,7 @@ Ngoài ra Task 11 có test "guard thất bại không tạo vòng redirect" (đ�
 
 - [ ] **Step 1: Viết test thất bại** `src/shared/lib/cn/cn.test.ts`: `cn('p-2', 'p-4')` trả `'p-4'`; `cn('a', false && 'b', undefined, 'c')` trả `'a c'`.
 - [ ] **Step 2: Dựng khung.** Tạo các file cấu hình port từ `$SRC` (`tsconfig.json`, `eslint.config.js`, `steiger.config.ts`, `.prettierrc.json`, `components.json`, `.gitignore`) với thay đổi: `package.json` đặt `name` `react-boilerplate`, `version` `0.1.0`, `private`, `type: module`, danh sách script ở Global Constraints; `eslint.config.js` bỏ mảng `DAYJS_AND_DATE_FILES` và hai luật dayjs/Date (giữ DTO restriction, `max-lines`, `exhaustive-deps`; để hai luật cũ dạng comment mẫu); `.gitignore` bỏ `.superpowers/`, `.worktrees/`, `e2e/.auth/` giữ `.env.*` + `!.env.example`; `components.json` giữ nguyên aliases; `vite.config.ts` bỏ VitePWA, `__APP_VERSION__`, `env: { VITE_UNIT_NAME }`, giữ: plugin react + tailwind, alias `@`, `server.proxy` và `preview.proxy` `/api` → `VITE_DEV_API_TARGET || 'http://127.0.0.1:8080'` (đọc bằng `loadEnv`), khối `test` (jsdom, globals, `setupFiles`, `css: false`, `testTimeout: 15_000`, `exclude: ['e2e/**','node_modules/**']`, hai alias ESM của `react-router` **kèm comment giải thích dual-package** và `server.deps.inline`). `.env.example` chỉ có `VITE_API_BASE` (comment, mặc định `/api/v1`) và `VITE_DEV_API_TARGET`.
-- [ ] **Step 3: `index.html` + `public/theme-init.js`.** Port script đặt `data-theme` từ `$SRC/index.html` thành file `public/theme-init.js` đọc khóa `app:theme`, nạp bằng `<script src="/theme-init.js"></script>` trong `<head>` (không còn script inline vì CSP ở Task 15). `<html lang="vi">`, `<title>React Boilerplate</title>`, bỏ mọi meta/icon PWA. `src/main.tsx` tạm render `<div>React Boilerplate</div>` (Task 11 thay thế); `src/app/styles/index.css` chỉ `@import 'tailwindcss';`.
+- [ ] **Step 3: `index.html` + `public/theme-init.js`.** Port script đặt `data-theme` từ `$SRC/index.html` thành file `public/theme-init.js` đọc khóa `app:theme`, nạp bằng `<script src="/theme-init.js"></script>` trong `<head>` (không còn script inline vì CSP ở Task 15). `<html lang="vi">`, `<title>React Boilerplate</title>`, bỏ mọi meta/icon PWA. `src/main.tsx` tạm render `<div>React Boilerplate</div>` (Task 11 thay thế); `src/app/styles/index.css` chỉ có `@import 'tailwindcss';` và dòng `@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));` để biến thể `dark:` của Tailwind bám theo `data-theme` do `theme-init.js` đặt.
 - [ ] **Step 4: Cài và chạy test**
   Run: `npm install && npx vitest run src/shared/lib/cn`
   Expected: FAIL (thiếu `cn.ts`), sau Step 5 PASS.
@@ -222,21 +223,24 @@ export interface AuthAdapter {
 
 ---
 
-### Task 8: `shared/ui`
+### Task 8: Cổng thông báo `shared/lib/notify` (thay cho lớp UI)
 
 **Files:**
-- Create: `src/shared/ui/**` (port các thư mục: `button`, `icon-button`, `label`, `field`, `form`, `text-field`, `card`, `badge`, `banner`, `skeleton`, `separator`, `switch`, `select`, `table`, `confirm-dialog`, `toast`, `auth-shell`, `bottom-nav`, `styles`, `index.ts`, `base-ui-guard.test.ts`, `type-utility-guard.test.ts`), `src/app/styles/theme.css` (port)
-- Modify: `src/app/styles/index.css`, `src/shared/i18n/messages.vi.ts`
+- Create: `src/shared/lib/notify/{notify.ts,notify.test.ts,index.ts}`
 
 **Interfaces:**
-- Produces: barrel `@/shared/ui` export các component trên cùng `toast` (API `toast.info/success/error`), `Toaster`, `mutateWithToast`, `toastApiError(error: unknown, fallback: string): void` (dùng `ApiError`/`getErrorMessage`).
-- Không port: `attendance-cell`, `carry-over-card`, `comment-bubble`, `completion-ring`, `deadline-countdown`, `done-toggle`, `rating-badge`, `stat-tabs`, `status-chip`, `subtask-row`, `task-card`, `team-filter`, `week-switcher`, `brand-mark`, `date-picker`, `calendar`, `drawer`, `sheet`, `searchable-select`, `action-menu`, `app-bar`, `avatar`, `progress-bar`, `radio-group`, `tag`, `tabs`.
+- Consumes: `ApiError`, `getErrorMessage` (Task 3).
+- Produces:
+  - `interface Notifier { info(message: string): void; success(message: string): void; error(message: string): void }`.
+  - `notify: Notifier` (ủy quyền cho notifier đang dùng); `setNotifier(notifier: Notifier | null): void` (`null` trả về notifier mặc định). Dự án nối thư viện toast của mình bằng một lần gọi `setNotifier` ở `main.tsx`.
+  - Notifier mặc định: thêm `<div role="status">` chứa nội dung vào `document.body`, không style, tự gỡ sau `NOTIFY_DEFAULT_TTL_MS = 5000`.
+  - `notifyApiError(error: unknown, fallback: string): void` = `notify.error(getErrorMessage(error, fallback))`.
 
-- [ ] **Step 1: Port test** `base-ui-guard.test.ts`, `type-utility-guard.test.ts` và test cạnh các component được port; chạy thấy FAIL (thiếu code).
-- [ ] **Step 2: Port component** từ `$SRC/src/shared/ui/` theo danh sách. Với mỗi file: grep chuỗi tiếng Việt hiển thị và đưa vào `messages.vi.ts` dưới `messages.ui.*`; `auth-shell` hiển thị `APP_NAME` thay logo domain; `theme.css` đổi màu thương hiệu xanh lục của `$SRC` sang bảng màu trung tính của shadcn `neutral` (`components.json` đã `baseColor: neutral`); `index.css` import `theme.css`.
-- [ ] **Step 3: Quét domain** — `grep -rniE "police|commune|bcx|công an|báo cáo|nhiệm vụ|chức vụ" src/shared/ui` không có kết quả.
+- [ ] **Step 1: Viết test thất bại** `notify.test.ts` (fake timers): notifier mặc định thêm phần tử `role="status"` có đúng nội dung và gỡ sau 5000 ms; `setNotifier(custom)` làm `notify.info/success/error` gọi `custom` với đúng message; `setNotifier(null)` trả về notifier mặc định; `notifyApiError(new ApiError({ status: 422, code: 'x', detail: 'Chi tiết' }), 'dự phòng')` gọi `error('Chi tiết')`; lỗi không phải `ApiError` gọi `error('dự phòng')`.
+- [ ] **Step 2: Chạy FAIL** — `npx vitest run src/shared/lib/notify`
+- [ ] **Step 3: Implement** theo Interfaces.
 - [ ] **Step 4: Chạy PASS + typecheck + lint + format:check**
-- [ ] **Step 5: Commit** `feat: shared ui components`
+- [ ] **Step 5: Commit** `feat: notify port replacing ui toast`
 
 ---
 
@@ -268,14 +272,14 @@ export interface AuthAdapter {
 ### Task 10: Features (sign-out, change-password, toggle-theme)
 
 **Files:**
-- Create: `src/features/sign-out/{index.ts,model/use-sign-out.ts,model/use-sign-out.test.tsx,ui/sign-out-confirm-dialog.tsx}`, `src/features/change-password/{index.ts,api/{requests.ts,requests.test.ts,mutations.ts,mutations.test.tsx},model/{change-password-schema.ts,password-policy.ts,password-policy.test.ts,use-change-password-submit.ts},ui/{change-password-form.tsx,change-password-form.test.tsx}}`, `src/features/toggle-theme/{index.ts,ui/{theme-switch.tsx,theme-switch.test.tsx,theme-toggle-button.tsx,theme-toggle-button.test.tsx}}`
+- Create: `src/features/sign-out/{index.ts,model/use-sign-out.ts,model/use-sign-out.test.tsx}`, `src/features/change-password/{index.ts,api/{requests.ts,requests.test.ts,mutations.ts,mutations.test.tsx},model/{change-password-schema.ts,password-policy.ts,password-policy.test.ts,use-change-password-submit.ts},ui/{change-password-form.tsx,change-password-form.test.tsx}}`, `src/features/toggle-theme/{index.ts,ui/{theme-toggle-button.tsx,theme-toggle-button.test.tsx}}`
 - Modify: `src/shared/i18n/messages.vi.ts` (nhóm `messages.signOut`, `messages.changePassword`, `messages.theme`)
 
 **Interfaces:**
-- Consumes: `signInAndLoadUser`, `sessionQueries` (Task 9); `getAuthAdapter`, `tokenStore`, `broadcastSignOut`, `ChangePasswordInput` (Task 4–6); `useTheme` (Task 7); `ui` (Task 8).
-- Produces: `useSignOut(): () => Promise<void>` (gọi `adapter.logout(http, tokenStore.getRefresh())` đua với chờ `SERVER_LOGOUT_WAIT_MS = 4000`, chỉ khi `tokenStore.hasSession()`, lỗi bị nuốt; sau đó `tokenStore.clear()`, `queryClient.clear()`, `broadcastSignOut()`; bỏ phần nháp/`session-tasks` của `$SRC`); `SignOutConfirmDialog`; `changePassword(input: ChangePasswordInput): Promise<void>` (= `getAuthAdapter().changePassword(http, input)`); `useChangePasswordSubmit()` (đổi xong thì đăng nhập lại ngầm bằng `signInAndLoadUser` như `$SRC`); `ChangePasswordForm`; `ThemeSwitch`, `ThemeToggleButton`.
+- Consumes: `signInAndLoadUser`, `sessionQueries` (Task 9); `getAuthAdapter`, `tokenStore`, `broadcastSignOut`, `ChangePasswordInput` (Task 4–6); `useTheme` (Task 7); `notify`, `notifyApiError` (Task 8).
+- Produces: `useSignOut(): () => Promise<void>` (gọi `adapter.logout(http, tokenStore.getRefresh())` đua với chờ `SERVER_LOGOUT_WAIT_MS = 4000`, chỉ khi `tokenStore.hasSession()`, lỗi bị nuốt; sau đó `tokenStore.clear()`, `queryClient.clear()`, `broadcastSignOut()`; bỏ phần nháp/`session-tasks` của `$SRC`; không có hộp thoại xác nhận, nút đăng xuất gọi thẳng); `changePassword(input: ChangePasswordInput): Promise<void>` (= `getAuthAdapter().changePassword(http, input)`); `useChangePasswordSubmit()` (đổi xong thì đăng nhập lại ngầm bằng `signInAndLoadUser` như `$SRC`); `ChangePasswordForm` (HTML thuần: ba `label`+`input` mật khẩu hiện tại/mới/nhập lại, `button type="submit"`, lỗi field và lỗi chung trong `p role="alert"`; dùng `react-hook-form` + `register`, không dùng component UI); `ThemeToggleButton` (một `button` gọi `setTheme`, `aria-pressed` theo theme tối).
 
-- [ ] **Step 1: Port test** từ `$SRC/src/features/*` tương ứng (giữ tên/assertion; bỏ assertion về nháp). `use-sign-out.test.tsx` thêm: `adapter không có refresh vẫn đăng xuất: logout gọi với refreshToken null, token bị xóa`. `requests.test.ts` kiểm `changePassword` đi qua `adapter.changePassword` (chạy với cả hai adapter).
+- [ ] **Step 1: Port test** từ `$SRC/src/features/*` tương ứng (giữ tên/assertion về hành vi; bỏ assertion về nháp, về hộp thoại xác nhận và về `ThemeSwitch`; truy vấn phần tử theo role/label, không theo class). `use-sign-out.test.tsx` thêm: `adapter không có refresh vẫn đăng xuất: logout gọi với refreshToken null, token bị xóa`. `requests.test.ts` kiểm `changePassword` đi qua `adapter.changePassword` (chạy với cả hai adapter).
 - [ ] **Step 2: Chạy FAIL** — `npx vitest run src/features`
 - [ ] **Step 3: Port code** từ `$SRC`; thay `signOutOnServer`/`/auth/*` hard-code bằng adapter; chuỗi tiếng Việt vào `messages.*`; `password-policy` giữ luật độ dài/ký tự nếu không gắn nghiệp vụ, ngược lại rút về `minLength: 8` kèm test.
 - [ ] **Step 4: Chạy PASS + typecheck + lint**
@@ -286,7 +290,7 @@ export interface AuthAdapter {
 ### Task 11: App layer (providers, router, guard, shell) và trang login/not-found
 
 **Files:**
-- Create: `src/app/bootstrap/{index.ts,app-providers.tsx,query-client.ts,query-client.test.ts,refresh-session-on-forbidden.ts,refresh-session-on-forbidden.test.ts}`, `src/app/router/{index.ts,create-app-router.ts,routes.tsx,loaders.ts,loaders.test.ts,routes.test.tsx,wire-session-events.ts,wire-session-events.test.tsx,hydrate-fallback.tsx,route-error-boundary.tsx}`, `src/app/layouts/app-shell/{index.ts,app-shell.tsx,app-shell.test.tsx,side-nav-section.tsx,bottom-nav-section.tsx,account-footer-section.tsx}`, `src/app/navigation/{index.ts,nav-items.ts,nav-items.test.ts}`, `src/pages/login/{index.ts,api/mutations.ts,model/{login-form-schema.ts,use-login-submit.ts,describe-sign-in-error.ts},ui/{login-page.tsx,login-form-section.tsx}}` + test cạnh, `src/pages/not-found/{index.ts,ui/not-found-page.tsx}`, `src/test/render.tsx`
+- Create: `src/app/bootstrap/{index.ts,app-providers.tsx,query-client.ts,query-client.test.ts,refresh-session-on-forbidden.ts,refresh-session-on-forbidden.test.ts}`, `src/app/router/{index.ts,create-app-router.ts,routes.tsx,loaders.ts,loaders.test.ts,routes.test.tsx,wire-session-events.ts,wire-session-events.test.tsx,hydrate-fallback.tsx,route-error-boundary.tsx}`, `src/app/layouts/app-shell/{index.ts,app-shell.tsx,app-shell.test.tsx,account-bar.tsx}`, `src/app/navigation/{index.ts,nav-items.ts,nav-items.test.ts}`, `src/pages/login/{index.ts,api/mutations.ts,model/{login-form-schema.ts,use-login-submit.ts,describe-sign-in-error.ts},ui/{login-page.tsx,login-form-section.tsx}}` + test cạnh, `src/pages/not-found/{index.ts,ui/not-found-page.tsx}`, `src/test/render.tsx`
 - Modify: `src/main.tsx`
 
 **Interfaces:**
@@ -296,12 +300,12 @@ export interface AuthAdapter {
   - `RouteRequires = { roles?: readonly string[]; anyPermission?: readonly string[] }` (cả hai có thì phải thỏa cả hai).
   - `createLoaders(queryClient)` → `{ sessionLoader, homeLoader, guard(requires: RouteRequires), loginLoader, changePasswordLoader }`; thứ tự kiểm: có phiên (không có thì redirect `ROUTES.Login` kèm `?next=` trừ khi đích là Home) → `mustChangePassword` (redirect `ROUTES.ChangePassword`) → `requires` (thất bại redirect `landingPathFor(user)`); `getUser` trả `null` khi không có phiên hoặc API trả 401, các lỗi khác (mạng, 5xx) được ném để hiện `RouteErrorBoundary`; `homeLoader` redirect tới `landingPathFor(user)`; `loginLoader` đã đăng nhập thì redirect `safeRedirect(next, landingPathFor(user))`.
   - `createRoutes({ queryClient }): RouteObject[]` (mỗi route lazy-load, `hydrateFallbackElement`, `errorElement: <RouteErrorBoundary />`; cây: `/login`, `/change-password`, `/` (loader `sessionLoader`, `AppShell`, con: index → `homeLoader`, `*` → NotFound)). Các task sau thêm route con vào đúng chỗ này.
-  - `createAppRouter({ queryClient })` (`createBrowserRouter(..., { basename: import.meta.env.BASE_URL })`); `wireSessionEvents(router: DataRouter, queryClient: QueryClient): () => void` (toast `messages.auth.sessionExpired`, `FORCED_NAVIGATION_STATE`).
-  - `NavItem = { id: string; label: string; to: string; icon: ComponentType; visibleFor?: (user: User) => boolean }`, `navItemsFor(user: User): NavItem[]` (ban đầu chỉ có Settings; item `ExampleItems` thêm ở Task 13 trong marker).
-  - `AppShell` (sidebar từ `md` trở lên, bottom nav bên dưới `md`, footer tài khoản hiện `displayName`, `ThemeToggleButton`, nút đăng xuất qua `useSignOut` + `SignOutConfirmDialog`); không port `rail-nav-section`, badge, push.
+  - `createAppRouter({ queryClient })` (`createBrowserRouter(..., { basename: import.meta.env.BASE_URL })`); `wireSessionEvents(router: DataRouter, queryClient: QueryClient): () => void` (`notify.info(messages.auth.sessionExpired)`, `FORCED_NAVIGATION_STATE`).
+  - `NavItem = { id: string; label: string; to: string; visibleFor?: (user: User) => boolean }`, `navItemsFor(user: User): NavItem[]` (ban đầu chỉ có Settings; item `ExampleItems` thêm ở Task 13 trong marker).
+  - `AppShell` (HTML thuần, không responsive/không style: `<header>` chứa `AccountBar` = `displayName`, `ThemeToggleButton`, nút "Đăng xuất" gọi `useSignOut`; `<nav aria-label>` là danh sách `NavLink` từ `navItemsFor(user)`; `<main><Outlet /></main>`). Không có sidebar, bottom nav, rail, badge, push.
   - `renderRoute(path: string, options?: { user?: User | null; handlers?: RequestHandler[]; setup?: () => void }): { router: DataRouter; queryClient: QueryClient; user: UserEvent }` (`user === undefined` → đăng nhập bằng user mặc định, `null` → chưa đăng nhập).
 
-- [ ] **Step 1: Port test** từ `$SRC/src/app/`: `query-client.test.ts`, `refresh-me-on-forbidden.test.ts` (đổi tên theo `createSessionRefresher`), `wire-session-events.test.tsx`, `app-shell.test.tsx` (bỏ phần badge/push), `loaders.test.ts` (chỉ các ca còn nghĩa: guard thiếu quyền → redirect `landingPathFor`, đổi mật khẩu được kiểm trước quyền); `$SRC/src/pages/login/**` test và `describe-sign-in-error.test.ts`.
+- [ ] **Step 1: Port test** từ `$SRC/src/app/`: `query-client.test.ts`, `refresh-me-on-forbidden.test.ts` (đổi tên theo `createSessionRefresher`), `wire-session-events.test.tsx`, `app-shell.test.tsx` (chỉ giữ ca hiển thị link điều hướng theo `visibleFor` và nút đăng xuất; bỏ badge/push/responsive), `loaders.test.ts` (chỉ các ca còn nghĩa: guard thiếu quyền → redirect `landingPathFor`, đổi mật khẩu được kiểm trước quyền); `$SRC/src/pages/login/**` test và `describe-sign-in-error.test.ts`.
 - [ ] **Step 2: Viết thêm test** `loaders.test.ts`/`routes.test.tsx`:
   - chưa đăng nhập vào `/example-nonexistent` → redirect `/login?next=%2Fexample-nonexistent`; vào `/` → `/login` (không `next`);
   - có refresh token nhưng `/me` trả 5xx hoặc mất mạng → `RouteErrorBoundary` hiện, **không** bị đẩy về login;
@@ -310,7 +314,7 @@ export interface AuthAdapter {
   - **không vòng redirect**: với `guard({ anyPermission: ['nobody:has'] })` và hai user (không quyền / `item:read`), `redirect` trỏ tới `landingPathFor(user)` và đích đó qua được loader của chính nó (chạy loader của route đích, không redirect tiếp);
   - `wireSessionEvents`: `onSessionExpired` → xóa cache, về `/login?next=…`; `onPasswordChangeRequired` → set `mustChangePassword` trong cache `/me` rồi tới `/change-password`.
 - [ ] **Step 3: Chạy FAIL** — `npx vitest run src/app src/pages`
-- [ ] **Step 4: Port code** theo Interfaces. `main.tsx`: `StrictMode` → `AppProviders` → `RouterProvider` + `Toaster` (bỏ `ServiceWorkerUpdateNotifier` và `createDraftStorage`). Chuỗi tiếng Việt (error boundary, hydrate fallback, shell, login, not-found) vào `messages.routeError`, `messages.shell`, `messages.login`, `messages.notFound`. `describe-sign-in-error` dùng `ApiErrorCode.InvalidCredentials` + 429 `retryAfterSeconds`.
+- [ ] **Step 4: Port code** theo Interfaces. `main.tsx`: `StrictMode` → `AppProviders` → `RouterProvider` (bỏ `Toaster`, `ServiceWorkerUpdateNotifier`, `createDraftStorage`; có comment mẫu `// setNotifier(...)` để nối thư viện toast). `render.tsx` tương tự, không `Toaster`. Chuỗi tiếng Việt (error boundary, hydrate fallback, shell, login, not-found) vào `messages.routeError`, `messages.shell`, `messages.login`, `messages.notFound`. `describe-sign-in-error` dùng `ApiErrorCode.InvalidCredentials` + 429 `retryAfterSeconds`.
 - [ ] **Step 5: Chạy PASS** — `npm run typecheck && npm run lint && npm test && npm run build`
 - [ ] **Step 6: Commit** `feat: app layer, guards, shell and login page`
 
@@ -323,7 +327,7 @@ export interface AuthAdapter {
 - Modify: `src/app/router/routes.tsx` (thêm hai route), `src/app/navigation/nav-items.ts` (item Settings), `src/shared/i18n/messages.vi.ts` (nhóm `messages.settings`)
 
 **Interfaces:**
-- Consumes: `ChangePasswordForm`, `ThemeSwitch`, `useSignOut`/`SignOutConfirmDialog` (Task 10), `useCurrentUser` (Task 9).
+- Consumes: `ChangePasswordForm`, `ThemeToggleButton`, `useSignOut` (Task 10), `useCurrentUser` (Task 9).
 - Produces: `ChangePasswordPage`, `SettingsPage` (các section: hồ sơ hiển thị `displayName`/`username`/`role`; giao diện (theme); mật khẩu (liên kết tới `ROUTES.ChangePassword`); tài khoản (đăng xuất)). Route `/change-password` dùng `changePasswordLoader`; route `/settings` nằm dưới `AppShell`, **không có** `requires` (đích hạ cánh an toàn của `landingPathFor`).
 
 - [ ] **Step 1: Port test** `change-password-page.test.tsx`, `settings-page.test.tsx`, `profile-section.test.tsx` từ `$SRC` (bỏ `reminders-section`, `leave-link-section`, push). Thêm test đi qua route: người dùng `mustChangePassword` đổi mật khẩu thành công thì tới `landingPathFor`; đổi sai mật khẩu hiện lỗi từ server dưới đúng field (`toRhfPath`).
@@ -337,7 +341,7 @@ export interface AuthAdapter {
 ### Task 13: Feature mẫu `example-item`
 
 **Files:**
-- Create: `src/entities/example-item/{index.ts,api/{dto.ts,mappers.ts,mappers.test.ts,requests.ts,requests.test.ts,queries.ts},model/example-item.ts}`, `src/pages/example-items/{index.ts,api/{mutations.ts,mutations.test.tsx},model/example-item-form-schema.ts,ui/{example-items-page.tsx,example-items-page.test.tsx,example-item-form-dialog.tsx}}`, `src/test/msw/example-items.ts`
+- Create: `src/entities/example-item/{index.ts,api/{dto.ts,mappers.ts,mappers.test.ts,requests.ts,requests.test.ts,queries.ts},model/example-item.ts}`, `src/pages/example-items/{index.ts,api/{mutations.ts,mutations.test.tsx},model/example-item-form-schema.ts,ui/{example-items-page.tsx,example-items-page.test.tsx,example-item-form.tsx}}`, `src/test/msw/example-items.ts`
 - Modify: `src/app/router/routes.tsx`, `src/app/navigation/nav-items.ts`, `src/test/msw/handlers.ts`, `src/shared/i18n/messages.vi.ts` (nhóm `messages.exampleItems`)
 - Mọi đoạn thêm vào file dùng chung (routes, nav, handlers, messages, `ROUTES`, `Permissions`, `landingPathFor`) bọc trong marker `// <example-item>` … `// </example-item>` (ở JSON/CSS dùng cùng ký hiệu nếu có; thực tế chỉ file `.ts`/`.tsx`).
 
@@ -352,9 +356,9 @@ export interface AuthAdapter {
 - [ ] **Step 1: Viết test thất bại.**
   - `mappers.test.ts`: `created_at` → `createdAt`.
   - `requests.test.ts`: list/create/update/delete gọi đúng method + URL + body.
-  - `example-items-page.test.tsx` (qua `renderRoute('/example-items')`): hiện skeleton rồi danh sách; trạng thái rỗng; lỗi tải có nút thử lại; tạo mới thành công (toast + dòng mới); sửa; xóa qua `ConfirmDialog` và hủy không xóa; 422 `errors` từ server hiện dưới đúng field; user không có `item:write` không thấy nút ghi; user không có `item:read` vào `/example-items` bị chuyển về `ROUTES.Settings` (guard).
+  - `example-items-page.test.tsx` (qua `renderRoute('/example-items')`): hiện `p role="status"` đang tải rồi bảng `<table>`; trạng thái rỗng; lỗi tải có nút thử lại; tạo mới thành công (`notify.success` được gọi qua `setNotifier` giả + dòng mới); sửa (form nội tuyến `example-item-form`, không modal); xóa hỏi bằng `window.confirm` (spy trả `true` thì xóa, `false` thì không xóa); 422 `errors` từ server hiện dưới đúng field; user không có `item:write` không thấy nút ghi; user không có `item:read` vào `/example-items` bị chuyển về `ROUTES.Settings` (guard).
 - [ ] **Step 2: Chạy FAIL** — `npx vitest run src/entities/example-item src/pages/example-items`
-- [ ] **Step 3: Implement** theo Interfaces: mutation dùng `mutateWithToast` và `queryClient.invalidateQueries(exampleItemQueries.all())`; form dùng `react-hook-form` + `zodResolver`; DTO chỉ import trong `api/` (luật ESLint). Thêm route con dưới `/` và đổi `homeLoader` không cần sửa (đã dùng `landingPathFor`).
+- [ ] **Step 3: Implement** theo Interfaces: mutation dùng `useMutation` với `onSuccess` gọi `notify.success` + `queryClient.invalidateQueries(exampleItemQueries.all())` và `onError` gọi `notifyApiError`; form HTML thuần dùng `react-hook-form` + `zodResolver` + `register`; DTO chỉ import trong `api/` (luật ESLint). Thêm route con dưới `/` và đổi `homeLoader` không cần sửa (đã dùng `landingPathFor`).
 - [ ] **Step 4: Chạy PASS** — `npm run typecheck && npm run lint && npm test && npm run build`
 - [ ] **Step 5: Commit** `feat: example-item sample feature`
 
@@ -369,7 +373,7 @@ export interface AuthAdapter {
 **Interfaces:**
 - Produces: `mockApi(page: Page): Promise<void>` (đăng ký `page.route('**/api/v1/**')` giả lập `/auth/login`, `/auth/logout`, `/me`, `/example-items` với user có `item:read`).
 
-- [ ] **Step 1: Viết `e2e/login.spec.ts`** gồm hai test: `chưa đăng nhập vào / bị chuyển tới /login` (URL khớp `/login`); `đăng nhập thành công tới danh sách mẫu rồi đăng xuất về /login` (điền form, thấy bảng example-items, mở menu tài khoản, xác nhận đăng xuất, URL `/login`).
+- [ ] **Step 1: Viết `e2e/login.spec.ts`** gồm hai test: `chưa đăng nhập vào / bị chuyển tới /login` (URL khớp `/login`); `đăng nhập thành công tới danh sách mẫu rồi đăng xuất về /login` (điền form, thấy bảng example-items, bấm nút "Đăng xuất", URL `/login`).
 - [ ] **Step 2: `playwright.config.ts`**: `webServer: { command: 'npm run dev -- --port 5173 --strictPort', url: 'http://localhost:5173', reuseExistingServer: !process.env.CI }`, `use.baseURL`, một project chromium, `testDir: 'e2e'`. Script `test:e2e` = `playwright test` (đã có).
 - [ ] **Step 3: Chạy** — `npx playwright install chromium` (tải binary trình duyệt, báo cho người dùng trước khi chạy nếu phiên cần phê duyệt) rồi `npm run test:e2e`. Expected: 2 passed.
 - [ ] **Step 4: Commit** `test: playwright login e2e with mocked api`
@@ -384,7 +388,7 @@ export interface AuthAdapter {
 **Interfaces:**
 - Produces: image nginx-unprivileged cổng 8080, `/healthz` trả `ok`, build-arg duy nhất `VITE_API_BASE` (rỗng → client dùng `/api/v1`).
 
-- [ ] **Step 1: Test thất bại** `deploy-config.test.ts` (đọc file bằng `node:fs`): `nginx.conf` chứa `Content-Security-Policy` với đúng các chỉ thị `default-src 'self'`, `script-src 'self'`, `style-src 'self' 'unsafe-inline'`, `img-src 'self' data:`, `connect-src 'self'`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`; có `location = /healthz`; có `location /api/` trả 404; `Dockerfile` không chứa `VITE_DEV_API_TARGET` và không chứa `VITE_UNIT_NAME`; `ci.yml` không chứa `branches: ['develop']` và có đủ các bước typecheck, lint, format:check, test, build; `index.html` không chứa thẻ `<script>` inline (mọi `<script>` đều có `src`).
+- [ ] **Step 1: Test thất bại** `deploy-config.test.ts` (đọc file bằng `node:fs`): `nginx.conf` chứa `Content-Security-Policy` với đúng các chỉ thị `default-src 'self'`, `script-src 'self'`, `style-src 'self'` (chặt vì template không có style inline; nginx.conf ghi comment: thư viện UI chèn style inline thì nới thành `'unsafe-inline'`), `img-src 'self' data:`, `connect-src 'self'`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`; có `location = /healthz`; có `location /api/` trả 404; `Dockerfile` không chứa `VITE_DEV_API_TARGET` và không chứa `VITE_UNIT_NAME`; `ci.yml` không chứa `branches: ['develop']` và có đủ các bước typecheck, lint, format:check, test, build; `index.html` không chứa thẻ `<script>` inline (mọi `<script>` đều có `src`).
 - [ ] **Step 2: Chạy FAIL** — `npx vitest run src/test/deploy-config.test.ts`
 - [ ] **Step 3: Port** `Dockerfile`, `.dockerignore`, `deploy/nginx.conf`, `ci.yml` từ `$SRC` với thay đổi: Dockerfile bỏ `VITE_UNIT_NAME`, `VITE_DEV_API_TARGET`, `verify:pwa`, ghi `.env` chỉ từ `VITE_API_BASE`; nginx bỏ cấu hình `sw.js`/`manifest.webmanifest`, thêm header CSP ở mọi location có `add_header` (nhắc: `add_header` trong `location` ghi đè header cấp server nên lặp lại `X-Content-Type-Options` và CSP ở từng location); `ci.yml`: `on: push: branches: [main]` và `pull_request:` (không lọc nhánh), bỏ bước `test:tz` và `verify-pwa`, chèn comment "đổi nhánh kích hoạt ở đây". `publish-image.yml`: kích hoạt khi push tag `v*`, build và push lên `ghcr.io/${{ github.repository }}` bằng `GITHUB_TOKEN` (`permissions: packages: write`), không runner tự host, không secret ngoài `GITHUB_TOKEN`.
 - [ ] **Step 4: Chạy PASS** — `npx vitest run src/test/deploy-config.test.ts`
@@ -405,7 +409,7 @@ export interface AuthAdapter {
 - [ ] **Step 2: Chạy** `npx vitest run src/test/no-domain-traces.test.ts`; sửa mọi dấu vết còn sót ở các task trước đến khi PASS.
 - [ ] **Step 3: Viết `scripts/*` và chạy** `node scripts/verify-example-removal.mjs`. Expected: exit 0 (Review Focus 5). Nếu thất bại, sửa marker còn thiếu ở các file dùng chung rồi chạy lại.
 - [ ] **Step 4: Viết tài liệu.**
-  - `README.md`: khởi tạo từ template (`Use this template` hoặc `npx degit`), script, cấu trúc FSD, thêm slice mới, đổi `Roles`/`Permissions` (`access.config.ts`), **đổi backend bằng cách viết lại adapter và `auth.config.ts`** kèm giới hạn (OIDC/redirect, session cookie, refresh token httpOnly phải thay cả module auth), xóa `example-item` (trỏ tới `docs/removing-example-item.md`), triển khai Docker/CI, đổi `STORAGE_PREFIX` đồng thời với `public/theme-init.js` (test canh sự đồng bộ), nhắc bật "Template repository" trong GitHub settings.
+  - `README.md`: khởi tạo từ template (`Use this template` hoặc `npx degit`), **thêm UI cho dự án** (template không kèm thư viện UI: `npx shadcn@latest add …` theo `components.json`, nối thông báo bằng `setNotifier`, nới CSP `style-src` nếu thư viện chèn style inline, thay markup thuần trong các trang/shell), script, cấu trúc FSD, thêm slice mới, đổi `Roles`/`Permissions` (`access.config.ts`), **đổi backend bằng cách viết lại adapter và `auth.config.ts`** kèm giới hạn (OIDC/redirect, session cookie, refresh token httpOnly phải thay cả module auth), xóa `example-item` (trỏ tới `docs/removing-example-item.md`), triển khai Docker/CI, đổi `STORAGE_PREFIX` đồng thời với `public/theme-init.js` (test canh sự đồng bộ), nhắc bật "Template repository" trong GitHub settings.
   - ADR-0001 FSD (không `widgets`, lý do, cách ép bằng Steiger + ESLint); ADR-0002 hợp đồng auth và token (access in-memory, refresh localStorage, đánh đổi XSS, CSP bắt buộc, chính sách xoay token/`isRefreshTokenSpent`, adapter); ADR-0003 data router. Đánh số liền mạch.
   - `docs/code-conventions.md` rút gọn từ `$SRC/docs/10-code-conventions.md` bỏ phần domain; `CLAUDE.md` ngắn (kiến trúc, lệnh, quy ước import, nơi đặt chuỗi UI, quy tắc `example-item`).
 - [ ] **Step 5: Xác minh cuối trên bản sạch**

@@ -15,12 +15,13 @@ Ngày: 2026-10-26 · Nguồn tham chiếu: `/home/tho-bui/Documents/projects/com
 | Cách dùng | GitHub template repo ("Use this template" hoặc `npx degit`) |
 | Ngôn ngữ UI | Tiếng Việt, mọi chuỗi chung gom vào một file messages, không dùng thư viện i18n |
 | Cách làm | Dựng repo mới, port có chọn lọc, kèm một feature mẫu (không clone-rồi-xóa) |
+| Lớp UI | Không đưa vào: không `shared/ui`, không thư viện component/icon/toast. Trang, shell và `ui/` của feature chỉ dùng HTML ngữ nghĩa thuần, không style. Thông báo qua cổng `notify` (`setNotifier` để nối toast riêng); xác nhận bằng `window.confirm`. Giữ Tailwind và `components.json` để dự án tự thêm component |
 
-**Ngoài phạm vi (YAGNI):** PWA/service worker/push, thư viện i18n, husky/commitlint, tầng `widgets`, tách package npm, CLI sinh code. Có thể thêm sau.
+**Ngoài phạm vi (YAGNI):** PWA/service worker/push, thư viện UI/component/icon, thư viện i18n, husky/commitlint, tầng `widgets`, tách package npm, CLI sinh code. Có thể thêm sau.
 
 ## 2. Stack
 
-Vite, React 19, TypeScript strict, React Router 7 (data router), TanStack Query, axios, react-hook-form + zod + `@hookform/resolvers`, Tailwind 4 + shadcn/ui (Base UI) + class-variance-authority + clsx + tailwind-merge + lucide-react, Vitest + jsdom + MSW + Testing Library, Playwright, ESLint 10 (flat config) + typescript-eslint + eslint-plugin-react-hooks, Prettier + prettier-plugin-tailwindcss, Steiger + `@feature-sliced/steiger-plugin`. Package manager: npm.
+Vite, React 19, TypeScript strict, React Router 7 (data router), TanStack Query, axios, react-hook-form + zod + `@hookform/resolvers`, Tailwind 4 + clsx + tailwind-merge (không kèm thư viện UI/icon: dự án tự thêm bằng `shadcn` CLI theo `components.json`), Vitest + jsdom + MSW + Testing Library, Playwright, ESLint 10 (flat config) + typescript-eslint + eslint-plugin-react-hooks, Prettier + prettier-plugin-tailwindcss, Steiger + `@feature-sliced/steiger-plugin`. Package manager: npm.
 
 Phiên bản lấy đúng bản đã chạy ổn trong `package.json` của repo gốc (Vite 8.3.x, TS 6.0.x, React 19.3.x, ESLint 10, Vitest 5, Steiger 0.7 + plugin 0.8). Khi cài, kiểm tra peer range của Steiger/plugin.
 
@@ -51,7 +52,7 @@ src/
                            auth.config.ts           chọn adapter đang dùng)
     config/         env, routes, storage-keys
     lib/            cn, hooks, form-errors, safe-redirect, theme, access
-    ui/             component thuần (button, input, form, field, table, dialog, toast, ...)
+    lib/notify/     cổng thông báo (notify, setNotifier); không có shared/ui
     i18n/           messages.vi.ts
   test/             setup, render, wrapper, query-client, msw/
 ```
@@ -108,7 +109,8 @@ Hợp đồng mặc định giữ như repo gốc, nhưng được tách khỏi 
 - Prettier: không dấu chấm phẩy, nháy đơn, printWidth 100, plugin sort class Tailwind.
 - Steiger: `steiger.config.ts`.
 - Không thêm husky/commitlint/lint-staged.
-- `components.json` cho shadcn, style `base-nova`.
+- `components.json` cho shadcn CLI (aliases `@/shared/ui`, `@/shared/lib/cn`); thư mục `shared/ui` do dự án tự tạo khi thêm component.
+- CSP của nginx dùng `style-src 'self'` (chặt vì không có style inline); README hướng dẫn nới thành `'unsafe-inline'` nếu thư viện UI của dự án cần.
 
 ## 8. Test
 
