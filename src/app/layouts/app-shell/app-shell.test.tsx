@@ -12,7 +12,7 @@ const linkNames = (nav: HTMLElement) =>
     .map((link) => link.textContent)
 
 test('thanh điều hướng hiện các mục mà navItemsFor cho phép', async () => {
-  renderRoute('/khong-co')
+  renderRoute('/khong-co', { user: makeUser({ permissions: [] }) })
 
   await screen.findByRole('heading', { name: 'Không tìm thấy trang' })
   expect(linkNames(mainNav())).toEqual(['Cài đặt'])
@@ -21,6 +21,19 @@ test('thanh điều hướng hiện các mục mà navItemsFor cho phép', async
     ROUTES.Settings,
   )
 })
+
+// <example-item>
+test('người dùng có item:read thấy thêm mục "Mục mẫu" trỏ tới trang mẫu', async () => {
+  renderRoute('/khong-co')
+
+  await screen.findByRole('heading', { name: 'Không tìm thấy trang' })
+  expect(linkNames(mainNav())).toEqual(['Mục mẫu', 'Cài đặt'])
+  expect(within(mainNav()).getByRole('link', { name: 'Mục mẫu' })).toHaveAttribute(
+    'href',
+    ROUTES.ExampleItems,
+  )
+})
+// </example-item>
 
 test('liên kết của route hiện tại có aria-current="page"', async () => {
   renderRoute(ROUTES.Settings)

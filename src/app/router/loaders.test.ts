@@ -3,6 +3,9 @@ import { matchRoutes } from 'react-router'
 import { landingPathFor, sessionQueries, type User } from '@/entities/session'
 import { ApiError, tokenStore } from '@/shared/api'
 import { ROUTES } from '@/shared/config'
+// <example-item>
+import { Permissions } from '@/shared/lib/access'
+// </example-item>
 import { makeUser } from '@/test/fixtures/user'
 import { createLoaders } from './loaders'
 import { createRoutes } from './routes'
@@ -118,6 +121,18 @@ describe('không vòng chuyển hướng', () => {
     const results = await destinationRedirects(user, target!)
     expect(results).toEqual(results.map(() => null))
   })
+
+  // <example-item>
+  test('người dùng có item:read: đích của guard là trang mẫu và loader của nó (guard item:read) cho qua', async () => {
+    const user = makeUser({ permissions: [Permissions.ItemRead] })
+    const target = await guardRedirect(user, (l) => l.guard({ anyPermission: ['nobody:has'] }))
+
+    expect(target).toBe(landingPathFor(user))
+    expect(target).toBe(ROUTES.ExampleItems)
+    const results = await destinationRedirects(user, target!)
+    expect(results).toEqual(results.map(() => null))
+  })
+  // </example-item>
 })
 
 describe('sessionLoader / homeLoader', () => {

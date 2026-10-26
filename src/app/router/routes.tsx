@@ -3,6 +3,9 @@ import type { RouteObject } from 'react-router'
 import { AppShell } from '@/app/layouts/app-shell'
 import { NotFoundPage } from '@/pages/not-found'
 import { ROUTES } from '@/shared/config'
+// <example-item>
+import { Permissions } from '@/shared/lib/access'
+// </example-item>
 import { HydrateFallback } from './hydrate-fallback'
 import { createLoaders } from './loaders'
 import { RouteErrorBoundary } from './route-error-boundary'
@@ -47,6 +50,15 @@ export function createRoutes({ queryClient }: { queryClient: QueryClient }): Rou
               path: ROUTES.Settings,
               lazy: async () => ({ Component: (await import('@/pages/settings')).SettingsPage }),
             },
+            // <example-item>
+            {
+              path: ROUTES.ExampleItems,
+              loader: loaders.guard({ anyPermission: [Permissions.ItemRead] }),
+              lazy: async () => ({
+                Component: (await import('@/pages/example-items')).ExampleItemsPage,
+              }),
+            },
+            // </example-item>
             // Route con của trang (có `loader: loaders.guard({ ... })` khi cần quyền) thêm vào đây.
             { path: '*', Component: NotFoundPage },
           ],

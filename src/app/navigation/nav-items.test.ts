@@ -1,5 +1,8 @@
 import { ROUTES } from '@/shared/config'
 import { can } from '@/shared/lib/access'
+// <example-item>
+import { Permissions } from '@/shared/lib/access'
+// </example-item>
 import { makeUser } from '@/test/fixtures/user'
 import { navItemsFor, type NavItem } from './nav-items'
 
@@ -22,3 +25,16 @@ test('mục có visibleFor chỉ hiện khi hàm trả true; không có visibleF
     'gated',
   ])
 })
+
+// <example-item>
+test('mục "Mục mẫu" chỉ hiện với người dùng có quyền item:read', () => {
+  const withRead = navItemsFor(makeUser({ permissions: [Permissions.ItemRead] }))
+  const without = navItemsFor(makeUser({ permissions: [Permissions.ItemWrite] }))
+
+  expect(withRead.find((item) => item.id === 'example-items')).toMatchObject({
+    label: 'Mục mẫu',
+    to: ROUTES.ExampleItems,
+  })
+  expect(without.map((item) => item.id)).toEqual(['settings'])
+})
+// </example-item>
