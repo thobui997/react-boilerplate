@@ -1,7 +1,6 @@
 # Ngữ cảnh build cần mã nguồn, cấu hình, e2e/ và scripts/ (tsc -b kiểm cả hai, xem tsconfig.json).
 node_modules/
 dist/
-dev-dist/
 coverage/
 playwright-report/
 test-results/

@@ -69,9 +69,9 @@ describe('deploy/nginx.conf', () => {
 describe('Dockerfile', () => {
   const dockerfile = read('Dockerfile')
 
-  test('không chứa biến của dự án gốc', () => {
-    expect(dockerfile).not.toContain('VITE_DEV_API_TARGET')
-    expect(dockerfile).not.toContain('VITE_UNIT_NAME')
+  test('chỉ dùng biến VITE_API_BASE, không còn bước PWA', () => {
+    const viteVars = new Set(dockerfile.match(/VITE_\w+/g))
+    expect(viteVars).toEqual(new Set(['VITE_API_BASE']))
     expect(dockerfile).not.toContain('verify:pwa')
   })
 
