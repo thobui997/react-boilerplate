@@ -155,6 +155,8 @@ Template không có `src/shared/ui`, thư viện component, icon hay toast. Khi 
    `style-src 'self' 'unsafe-inline'` ở **mọi** dòng `add_header Content-Security-Policy` trong `deploy/nginx.conf`
    (cấp server và từng `location`), rồi sửa `CANONICAL_CSP` và test "không có unsafe-inline" trong
    `src/test/deploy-config.test.ts` cho khớp. Không nới `script-src`.
+   Tương tự, `connect-src 'self'` chặn API khác origin trong image Docker: nếu `VITE_API_BASE` trỏ tới origin khác
+   (vd. `https://api.example.com/v1`), thêm origin đó vào `connect-src` ở mọi dòng CSP.
 
 ## Khóa lưu trữ (`STORAGE_PREFIX`)
 

@@ -1,7 +1,10 @@
 name: CI
 
 # Kiểm tra chất lượng cho nhánh chính (push) và mọi pull request.
-# Chỉ kiểm tra: không phát hành, không E2E (cần API thật), không dùng secret.
+# Chỉ kiểm tra: không phát hành, không dùng secret.
+# E2E mặc định không chạy trong CI (API đã được giả lập nhưng cần cài trình duyệt). Muốn bật, thêm hai bước sau Build:
+#   npx playwright install --with-deps chromium
+#   npm run test:e2e
 
 on:
   push:

@@ -46,9 +46,12 @@ describe('deploy/nginx.conf', () => {
     expect(cspValues(nginx)).toHaveLength(withHeaders.length + serverCount)
   })
 
-  test('mọi location có add_header đều lặp lại X-Content-Type-Options', () => {
+  // add_header trong location làm mất MỌI header cấp server, nên từng location phải tự đặt lại header bảo mật.
+  test('mọi location có add_header đều lặp lại X-Content-Type-Options và Referrer-Policy', () => {
+    expect(withHeaders.length).toBeGreaterThan(0)
     for (const body of withHeaders) {
-      expect(body).toMatch(/add_header\s+X-Content-Type-Options\s+nosniff/)
+      expect(body).toMatch(/add_header\s+X-Content-Type-Options\s+nosniff\s+always;/)
+      expect(body).toMatch(/add_header\s+Referrer-Policy\s+same-origin\s+always;/)
     }
   })
 
