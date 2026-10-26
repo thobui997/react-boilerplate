@@ -3,41 +3,62 @@ import { readFileSync } from 'node:fs'
 const read = (path: string) => readFileSync(path, 'utf8')
 
 describe('deploy/nginx.conf', () => {
-  const nginx = read('deploy/nginx.conf')
+  const raw = read('deploy/nginx.conf')
+  // Bỏ dòng comment để lời giải thích (vd. nhắc 'unsafe-inline') không làm test pass nhầm.
+  const nginx = raw
+    .split('\n')
+    .filter((line) => !line.trim().startsWith('#'))
+    .join('\n')
+  const locationBlocks = [...nginx.matchAll(/location [^{]+\{([^}]*)\}/g)].map((m) => m[1])
+  const withHeaders = locationBlocks.filter((body) => body.includes('add_header'))
+  const serverLevel = nginx.replace(/location [^{]+\{[^}]*\}/g, '')
+  const cspValues = (text: string) =>
+    [...text.matchAll(/add_header\s+Content-Security-Policy\s+"([^"]*)"/g)].map((m) => m[1])
 
-  test('đặt CSP với đúng các chỉ thị', () => {
-    expect(nginx).toContain('Content-Security-Policy')
-    for (const directive of [
-      "default-src 'self'",
-      "script-src 'self'",
-      "style-src 'self'",
-      "img-src 'self' data:",
-      "connect-src 'self'",
-      "frame-ancestors 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-    ]) {
-      expect(nginx).toContain(directive)
+  const CANONICAL_CSP = [
+    "default-src 'self'",
+    "script-src 'self'",
+    "style-src 'self'",
+    "img-src 'self' data:",
+    "connect-src 'self'",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join('; ')
+
+  test('mọi bản CSP giống hệt nhau và đúng tám chỉ thị yêu cầu', () => {
+    const values = cspValues(nginx)
+    expect(values.length).toBeGreaterThan(0)
+    for (const value of values) expect(value).toBe(CANONICAL_CSP)
+  })
+
+  test('CSP không có unsafe-inline / unsafe-eval (comment không được tính)', () => {
+    const values = cspValues(nginx)
+    expect(values.length).toBeGreaterThan(0)
+    for (const value of values) expect(value).not.toMatch(/'unsafe-(inline|eval)'/)
+  })
+
+  test('mỗi location có add_header và cấp server (nếu có) đều có đúng một CSP', () => {
+    expect(withHeaders.length).toBeGreaterThan(0)
+    for (const body of withHeaders) expect(cspValues(body)).toHaveLength(1)
+    const serverCount = cspValues(serverLevel).length
+    expect(serverCount).toBeLessThanOrEqual(1)
+    expect(cspValues(nginx)).toHaveLength(withHeaders.length + serverCount)
+  })
+
+  test('mọi location có add_header đều lặp lại X-Content-Type-Options', () => {
+    for (const body of withHeaders) {
+      expect(body).toMatch(/add_header\s+X-Content-Type-Options\s+nosniff/)
     }
   })
 
   test('ghi chú cách nới style-src khi UI lib chèn style inline', () => {
-    expect(nginx).toContain("'unsafe-inline'")
+    expect(raw).toMatch(/#.*'unsafe-inline'/)
   })
 
   test('có /healthz và /api/ trả 404', () => {
     expect(nginx).toMatch(/location = \/healthz\s*\{/)
     expect(nginx).toMatch(/location \/api\/\s*\{\s*return 404;/)
-  })
-
-  test('mọi location có add_header đều lặp lại nosniff và CSP', () => {
-    const blocks = [...nginx.matchAll(/location [^{]+\{([^}]*)\}/g)].map((m) => m[1])
-    const withHeaders = blocks.filter((body) => body.includes('add_header'))
-    expect(withHeaders.length).toBeGreaterThan(0)
-    for (const body of withHeaders) {
-      expect(body).toContain('X-Content-Type-Options')
-      expect(body).toContain('Content-Security-Policy')
-    }
   })
 
   test('không còn cấu hình service worker / manifest', () => {
