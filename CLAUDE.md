@@ -40,8 +40,8 @@ Sau khi sửa code: `npm run typecheck && npm run lint && npm run format:check &
 - Test cạnh code (`*.test.ts[x]`), MSW ở `src/test/msw`, trang test bằng `renderRoute` (`src/test/render.tsx`).
 - `STORAGE_PREFIX` đổi thì sửa cả `public/theme-init.js` (có test canh). CSP trong `deploy/nginx.conf` có test canh
   (`src/test/deploy-config.test.ts`).
-- Không để từ khóa nghiệp vụ của dự án nguồn trong repo: `src/test/no-domain-traces.test.ts` quét mọi file.
-- Không sửa `docs/superpowers/` và `.superpowers/`.
+- Chỉ khi bảo trì chính template: `src/test/no-domain-traces.test.ts` canh không còn từ khóa nghiệp vụ của dự án
+  nguồn, và không sửa `docs/superpowers/`, `.superpowers/`. Dự án tạo từ template có thể xóa test quét đó.
 
 ## Quy tắc `example-item`
 

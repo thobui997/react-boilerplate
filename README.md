@@ -21,6 +21,8 @@ Yêu cầu: Node `>=22.13` (xem `.nvmrc`), npm.
 4. `npm ci && npm run dev`.
 5. Chọn tiền tố localStorage (mục [Khóa lưu trữ](#khóa-lưu-trữ-storage_prefix)) **trước lần triển khai đầu tiên**.
 6. Khi đã quen cấu trúc, gỡ tính năng mẫu (mục [Gỡ example-item](#gỡ-example-item)).
+7. `src/test/no-domain-traces.test.ts` chỉ canh chính template (không còn từ khóa của dự án nguồn); dự án mới có thể
+   xóa nó.
 
 Người duy trì template: bật **Settings → General → Template repository** trên GitHub để nút "Use this template" xuất
 hiện.
