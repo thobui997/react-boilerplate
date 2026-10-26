@@ -73,6 +73,7 @@ src/
 Import một chiều `app → pages → features → entities → shared`; mỗi slice chỉ lộ ra qua `index.ts`. Không có layer
 `widgets` (xem [ADR-0001](docs/decisions/0001-feature-sliced-design.md)). Quy ước chi tiết:
 [docs/code-conventions.md](docs/code-conventions.md).
+Claude Code đọc [CLAUDE.md](CLAUDE.md) và các luật theo đường dẫn trong `.claude/rules/`.
 
 ### Thêm một slice
 
@@ -123,7 +124,8 @@ lỗi kiểm tra thông tin như sai mật khẩu hiện tại), `isRefreshToken
 4. Cập nhật test dựng theo hợp đồng mặc định: `signInAs` (`src/test/msw/api.ts`), `makeMeDto`
    (`src/test/fixtures/user.ts`), `e2e/support/mock-api.ts`, và các test giả lập endpoint mặc định
    (`grep -rln "'/auth/\|'/me'" src e2e`). Test cơ chế chạy với cả hai adapter ở
-   `src/test/auth/adapter-contract.test.ts`; thêm adapter mới vào đó.
+   `src/test/auth/adapter-contract.test.ts` và `src/shared/api/auth/auth-contract.test.ts`; thêm adapter mới vào
+   mảng `cases` của cả hai.
 
 **Ngoài khả năng của adapter** (phải thay cả module `shared/api/auth`):
 

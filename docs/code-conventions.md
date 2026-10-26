@@ -2,6 +2,8 @@
 
 Tài liệu ngắn về cách viết code trong template. Kiến trúc tổng thể: [ADR-0001](decisions/0001-feature-sliced-design.md).
 Lint (`npm run lint`) và Prettier (`npm run format:check`) ép phần cơ học; phần còn lại là quy ước khi review.
+Bản tiếng Anh cho Claude Code nằm ở `.claude/rules/` (nạp theo đường dẫn file đang sửa), tóm tắt ở
+[CLAUDE.md](../CLAUDE.md); sửa quy ước thì sửa cả hai nơi.
 
 ## 1. Sở hữu slice
 

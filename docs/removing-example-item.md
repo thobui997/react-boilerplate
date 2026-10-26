@@ -35,8 +35,8 @@ Chạy lần hai không làm gì ("Không còn gì của example-item để gỡ
   trần, không còn ai đọc); thay bằng quyền của dự án khi viết test.
 - e2e `e2e/login.spec.ts` vẫn kiểm luồng đăng nhập → đăng xuất, chỉ bỏ bước kiểm bảng mẫu.
 - Script **không** sửa tài liệu: tự xóa các nhắc tới `example-item` trong `README.md`, `CLAUDE.md`, `docs/` (kể cả
-  file này nếu muốn), và bỏ dòng `verify:example-removal` trong `package.json` cùng `scripts/verify-example-removal.mjs`
-  nếu không cần nữa.
+  file này nếu muốn), `.claude/rules/` (xóa `example-item-markers.md`, sửa các ví dụ trỏ tới slice mẫu), và bỏ dòng
+  `verify:example-removal` trong `package.json` cùng `scripts/verify-example-removal.mjs` nếu không cần nữa.
 
 ## Quy ước marker (khi sửa template)
 

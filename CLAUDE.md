@@ -1,52 +1,53 @@
 # CLAUDE.md
 
-SPA React (Vite, React 19, TypeScript strict, React Router 7 data router, TanStack Query, axios, react-hook-form + zod)
-tạo từ template. Tài liệu tiếng Việt, định danh trong code tiếng Anh. Chi tiết: `README.md`,
-`docs/code-conventions.md`, `docs/decisions/`.
+Template SPA React: Vite, React 19, TypeScript strict, React Router 7 (data router), TanStack Query, axios,
+react-hook-form + zod. Tài liệu tiếng Việt, định danh trong code tiếng Anh.
 
 ## Lệnh
 
-`npm run dev` · `npm run build` · `npm run typecheck` · `npm run lint` (ESLint + Steiger) · `npm run format` /
-`format:check` · `npm test` · `npm run test:e2e` (Playwright, API giả) · `npm run verify:example-removal`.
-Sau khi sửa code: `npm run typecheck && npm run lint && npm run format:check && npm test`.
+- `npm run dev` · `npm run build` · `npm run typecheck` · `npm run lint` (ESLint + Steiger) · `npm run format` /
+  `npm run format:check` · `npm test` · `npm run test:e2e` (Playwright, API giả) · `npm run verify:example-removal`.
+- Sau khi sửa code chạy: `npm run typecheck && npm run lint && npm run format:check && npm test`.
 
 ## Kiến trúc
 
-- Feature-Sliced Design: `app → pages → features → entities → shared`, import một chiều, không import chéo slice cùng
-  layer, **không có `widgets`** (khung ở `app/layouts`, menu ở `app/navigation`). Steiger ép layer; ESLint ép
-  `max-lines` 300, `exhaustive-deps` và cấm import DTO.
-- Pages First: code ở page cho tới khi có consumer thứ hai, rồi mới tách `entities/<noun>` (đọc) hoặc
-  `features/<verb>-<noun>` (ghi).
-- Slice: `api/` (`dto.ts` không xuất, `mappers.ts`, `requests.ts`, `queries.ts` với `queryOptions`, `mutations.ts`),
-  `model/` (kiểu miền, schema zod, hook), `ui/`, `index.ts` là public API. `entities/` không có `useMutation`.
-- Auth: cơ chế ở `src/shared/api/auth/` (không sửa theo backend); hợp đồng backend chỉ qua `AuthAdapter`
-  (`auth-adapter.ts`, chọn trong `auth.config.ts`, mặc định `adapters/default.ts`). Code ngoài auth gọi
-  `getAuthAdapter()`, không hard-code endpoint auth.
-- Guard là loader (`src/app/router/loaders.ts`): phiên → đổi mật khẩu → quyền (`loaders.guard({ roles, anyPermission })`).
-  Loader không tải dữ liệu trang. Đích của `landingPathFor` không được cần quyền người dùng chưa có.
-- `shared/api` không import `app`: phát sự kiện, `app/router/wire-session-events.ts` điều hướng.
-- Quyền: `Roles`/`Permissions` ở `src/shared/lib/access/access.config.ts`; kiểm bằng `can`/`canAny`/`hasRole`.
+- Layer FSD `app → pages → features → entities → shared`, import một chiều, không import chéo slice cùng layer; không
+  có `widgets` (khung ở `src/app/layouts`, menu ở `src/app/navigation`).
+- Pages First: code ở page cho tới khi có consumer thứ hai, rồi mới tách `entities/<noun>` hoặc `features/<verb>-<noun>`.
+- Slice gồm `api/`, `model/`, `ui/`; chỉ lộ ra qua `index.ts`, import từ ngoài bằng alias `@/`.
+- `shared/api` không import `app`: nó phát sự kiện, `src/app/router/wire-session-events.ts` điều hướng.
+- Guard là loader (`src/app/router/loaders.ts`), thứ tự phiên → đổi mật khẩu → quyền; loader không tải dữ liệu trang.
+  Đích của `landingPathFor` không được cần quyền người dùng chưa có (nếu không sẽ chuyển hướng vòng).
+- Quyền khai báo bằng `Roles`/`Permissions` ở `src/shared/lib/access/access.config.ts`, kiểm bằng `can`/`canAny`/`hasRole`.
+- Mọi chuỗi UI ở `src/shared/i18n/messages.vi.ts`, import `messages` từ `@/shared/i18n`.
+- UI là HTML ngữ nghĩa thuần, không có `shared/ui`; thông báo qua `notify` (`@/shared/lib/notify`).
 
-## Quy ước
+## Quy tắc nạp tự động
 
-- Import qua alias `@/` và qua `index.ts` của slice; trong cùng slice dùng đường dẫn tương đối.
-- Mọi chuỗi UI dùng chung ở `src/shared/i18n/messages.vi.ts` (nhóm theo slice/trang), import `messages` từ
-  `@/shared/i18n`. Không thư viện i18n.
-- Hằng thay chuỗi trần: `ROUTES`, `STORAGE_KEYS` (`shared/config`), `ApiErrorCode`/`HttpStatus`
-  (`shared/api/error-codes.ts`), `Permissions`. Enum là object `as const` + `ValueOf`.
-- UI là HTML ngữ nghĩa thuần, không class/style; không có `shared/ui`. Thông báo qua `notify`
-  (`@/shared/lib/notify`), xác nhận nguy hiểm bằng `window.confirm`.
-- `useEffect` chỉ để đồng bộ với hệ thống ngoài React, gói trong hook có tên ở `shared/lib/hooks`.
-- Test cạnh code (`*.test.ts[x]`), MSW ở `src/test/msw`, trang test bằng `renderRoute` (`src/test/render.tsx`).
-- `STORAGE_PREFIX` đổi thì sửa cả `public/theme-init.js` (có test canh). CSP trong `deploy/nginx.conf` có test canh
-  (`src/test/deploy-config.test.ts`).
-- Chỉ khi bảo trì chính template: `src/test/no-domain-traces.test.ts` canh không còn từ khóa nghiệp vụ của dự án
-  nguồn, và không sửa `docs/superpowers/`, `.superpowers/`. Dự án tạo từ template có thể xóa test quét đó.
+Các file trong `.claude/rules/` chỉ được nạp khi làm việc với file khớp `paths:` ở đầu mỗi file.
 
-## Quy tắc `example-item`
+| File                         | Nạp khi sửa                                                   | Mục đích                                     |
+| ---------------------------- | ------------------------------------------------------------- | -------------------------------------------- |
+| `component-decomposition.md` | `src/**/*.ts(x)`                                              | Giới hạn 300 dòng, tách theo trách nhiệm     |
+| `react-clean-code.md`        | `src/**/*.ts(x)`                                              | Đặt tên, hàm nhỏ, lỗi, test                  |
+| `react-component-design.md`  | `src/**/*.tsx`                                                | Số props, composition, HTML thuần            |
+| `react-forms.md`             | `src/**/*.ts(x)`                                              | react-hook-form + zod, lỗi 422 theo ô        |
+| `react-query-layering.md`    | `src/**/*`                                                    | dto/mapper/request/query, mutation, `notify` |
+| `useeffect-discipline.md`    | `src/**/*.ts(x)`                                              | Khi nào được dùng `useEffect`, hook có sẵn   |
+| `auth-adapter.md`            | `shared/api`, session, sign-out, change-password, `test/auth` | Cơ chế auth, hợp đồng `AuthAdapter`          |
+| `example-item-markers.md`    | `src/`, `e2e/`, `steiger.config.ts`, `scripts/`               | Marker `// <example-item>` và cách gỡ mẫu    |
 
-Tính năng mẫu nằm ở `src/entities/example-item`, `src/pages/example-items`, `src/test/msw/example-items.ts`. Mọi dòng
-ở file dùng chung chỉ phục vụ nó (import, route, mục menu, `Permissions.Item*`, `messages.exampleItems`, handler, test
-case, ngoại lệ Steiger) phải nằm giữa hai dòng comment riêng `// <example-item>` và `// </example-item>`, không lồng
-nhau. Sửa phần đó xong chạy `npm run verify:example-removal`. Gỡ hẳn: `node scripts/remove-example.mjs`
-(`docs/removing-example-item.md`).
+## Nơi tra cứu
+
+- `README.md`: khởi tạo dự án, biến môi trường, đổi backend, thêm UI, triển khai.
+- `docs/code-conventions.md`: quy ước mã nguồn (tiếng Việt, cùng nội dung với các rule).
+- `docs/decisions/`: ADR (FSD, hợp đồng auth và lưu token, data router).
+- `docs/removing-example-item.md`: gỡ tính năng mẫu và quy ước marker.
+
+## Bảo trì template
+
+- `src/test/no-domain-traces.test.ts` canh không còn từ khóa nghiệp vụ của dự án nguồn (quét cả `.claude/` và file
+  này); dự án tạo từ template có thể xóa test đó.
+- Không sửa `docs/superpowers/` và `.superpowers/`.
+- Đổi `STORAGE_PREFIX` thì sửa cả `public/theme-init.js` (`src/shared/config/storage-keys.test.ts` canh).
+- CSP trong `deploy/nginx.conf` được `src/test/deploy-config.test.ts` canh: sửa CSP thì sửa test cùng lúc.
