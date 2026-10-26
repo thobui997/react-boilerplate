@@ -69,6 +69,7 @@ Hợp đồng mặc định giữ như repo gốc, nhưng được tách khỏi 
 - **Cơ chế (cố định, có test, không sửa theo từng backend):** single-flight refresh, khóa liên tab, retry sau 401, token store, thứ tự guard, phát sự kiện session.
 - **Hợp đồng (đổi theo backend):** interface `AuthAdapter` trong `shared/api/auth/auth-adapter.ts`. Mọi điểm chạm với hợp đồng backend đều đi qua adapter, không còn endpoint hay field nào hard-code ngoài nó:
   - `login(client, credentials)`, `refresh(client, refreshToken)`, `logout(client, refreshToken)`: gọi endpoint, trả về token.
+  - `changePassword(client, input)`: endpoint đổi mật khẩu (cũng là một điểm chạm hợp đồng backend, nên đi qua adapter).
   - `fetchCurrentUser(client, signal)`: gọi endpoint "người dùng hiện tại" và map response thành `AuthUser` chung (`id`, `username`, `displayName`, `role`, `permissions`, `mustChangePassword`).
   - `unauthenticatedPaths`: các đường dẫn không gắn Bearer và không bao giờ kích hoạt refresh (mặc định `/auth/login`, `/auth/refresh`).
   - `isRefreshTokenSpent(error)`: chính sách khi refresh thất bại, lỗi nào coi refresh token đã bị dùng/thu hồi nên phải kết thúc phiên (mặc định 401, lỗi mạng, 5xx). Đây là chính sách xoay token và phát hiện tái sử dụng của backend.
