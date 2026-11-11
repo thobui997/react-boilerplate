@@ -10,17 +10,17 @@ export function LoginPage() {
   const state = useLocation().state as { passwordChanged?: boolean } | null
 
   return (
-    <main>
-      <p>{APP_NAME}</p>
-      <h1>{messages.login.title}</h1>
+    <main className="mx-auto flex max-w-sm flex-col gap-4 p-6">
+      <p className="text-muted-foreground text-sm">{APP_NAME}</p>
+      <h1 className="text-xl font-semibold">{messages.login.title}</h1>
       {state?.passwordChanged && <p role="status">{messages.login.passwordChanged}</p>}
       {error && (
-        <p role="alert">
+        <p role="alert" className="text-destructive text-sm">
           <strong>{error.title}</strong> {error.message}
         </p>
       )}
       <LoginFormSection onSubmit={submit} isPending={isPending} />
-      <p>{messages.login.forgotPassword}</p>
+      <p className="text-muted-foreground text-sm">{messages.login.forgotPassword}</p>
     </main>
   )
 }

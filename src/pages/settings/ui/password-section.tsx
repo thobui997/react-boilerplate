@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { ChangePasswordForm } from '@/features/change-password'
 import { messages } from '@/shared/i18n'
+import { Button } from '@/shared/ui/button'
 
 interface PasswordSectionProps {
   username: string
@@ -14,8 +15,10 @@ export function PasswordSection({ username, onChanged, onReloginFailed }: Passwo
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <section aria-labelledby="settings-password">
-      <h2 id="settings-password">{messages.settings.password.title}</h2>
+    <section aria-labelledby="settings-password" className="flex flex-col items-start gap-3">
+      <h2 id="settings-password" className="text-lg font-medium">
+        {messages.settings.password.title}
+      </h2>
       {isOpen ? (
         <ChangePasswordForm
           username={username}
@@ -28,9 +31,9 @@ export function PasswordSection({ username, onChanged, onReloginFailed }: Passwo
           onCancel={() => setIsOpen(false)}
         />
       ) : (
-        <button type="button" onClick={() => setIsOpen(true)}>
+        <Button type="button" variant="outline" onClick={() => setIsOpen(true)}>
           {messages.settings.password.open}
-        </button>
+        </Button>
       )}
     </section>
   )

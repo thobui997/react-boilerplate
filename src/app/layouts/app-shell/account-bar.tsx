@@ -4,6 +4,7 @@ import { useSignOut } from '@/features/sign-out'
 import { ThemeToggleButton } from '@/features/toggle-theme'
 import { ROUTES } from '@/shared/config'
 import { messages } from '@/shared/i18n'
+import { Button } from '@/shared/ui/button'
 
 export function AccountBar({ user }: { user: User }) {
   const signOut = useSignOut()
@@ -16,11 +17,12 @@ export function AccountBar({ user }: { user: User }) {
   }
 
   return (
-    <div>
-      <span>{user.displayName}</span> <ThemeToggleButton />{' '}
-      <button type="button" onClick={handleSignOut}>
+    <div className="flex items-center justify-end gap-2">
+      <span className="text-sm">{user.displayName}</span>
+      <ThemeToggleButton />
+      <Button type="button" variant="outline" onClick={handleSignOut}>
         {messages.signOut.action}
-      </button>
+      </Button>
     </div>
   )
 }

@@ -3,8 +3,10 @@ import { messages } from '@/shared/i18n'
 
 export function AppearanceSection() {
   return (
-    <section aria-labelledby="settings-appearance">
-      <h2 id="settings-appearance">{messages.settings.appearance.title}</h2>
+    <section aria-labelledby="settings-appearance" className="flex flex-col items-start gap-3">
+      <h2 id="settings-appearance" className="text-lg font-medium">
+        {messages.settings.appearance.title}
+      </h2>
       <ThemeToggleButton />
     </section>
   )

@@ -25,8 +25,8 @@ export function SettingsPage() {
   }
 
   return (
-    <div>
-      <h1>{messages.settings.title}</h1>
+    <div className="flex max-w-xl flex-col gap-6">
+      <h1 className="text-xl font-semibold">{messages.settings.title}</h1>
       <ProfileSection user={user} />
       <AppearanceSection />
       <PasswordSection
