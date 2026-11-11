@@ -18,7 +18,7 @@ describe('deploy/nginx.conf', () => {
   const CANONICAL_CSP = [
     "default-src 'self'",
     "script-src 'self'",
-    "style-src 'self'",
+    "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data:",
     "connect-src 'self'",
     "frame-ancestors 'none'",
@@ -32,10 +32,15 @@ describe('deploy/nginx.conf', () => {
     for (const value of values) expect(value).toBe(CANONICAL_CSP)
   })
 
-  test('CSP không có unsafe-inline / unsafe-eval (comment không được tính)', () => {
+  test("script-src không có unsafe-inline / unsafe-eval; style-src đúng 'self' 'unsafe-inline' (comment không được tính)", () => {
     const values = cspValues(nginx)
     expect(values.length).toBeGreaterThan(0)
-    for (const value of values) expect(value).not.toMatch(/'unsafe-(inline|eval)'/)
+    for (const value of values) {
+      expect(value).not.toMatch(/'unsafe-eval'/)
+      const directive = (name: string) => value.split('; ').find((part) => part.startsWith(name))
+      expect(directive('script-src')).toBe("script-src 'self'")
+      expect(directive('style-src')).toBe("style-src 'self' 'unsafe-inline'")
+    }
   })
 
   test('mỗi location có add_header và cấp server (nếu có) đều có đúng một CSP', () => {
@@ -55,7 +60,7 @@ describe('deploy/nginx.conf', () => {
     }
   })
 
-  test('ghi chú cách nới style-src khi UI lib chèn style inline', () => {
+  test('ghi chú lý do style-src có unsafe-inline', () => {
     expect(raw).toMatch(/#.*'unsafe-inline'/)
   })
 
