@@ -5,6 +5,10 @@ import type { ExampleItem } from '@/entities/example-item'
 import { ApiError, HttpStatus } from '@/shared/api'
 import { messages } from '@/shared/i18n'
 import { fieldErrorsFromApi } from '@/shared/lib/form-errors'
+import { Button } from '@/shared/ui/button'
+import { Input } from '@/shared/ui/input'
+import { Label } from '@/shared/ui/label'
+import { Textarea } from '@/shared/ui/textarea'
 import { useCreateExampleItemMutation, useUpdateExampleItemMutation } from '../api/mutations'
 import {
   exampleItemFormSchema,
@@ -55,10 +59,10 @@ export function ExampleItemForm({ item, onClose }: ExampleItemFormProps) {
   const isPending = create.isPending || update.isPending
 
   return (
-    <form onSubmit={handleSubmit(save)} noValidate>
-      <div>
-        <label htmlFor={`${id}-name`}>{text.name}</label>
-        <input
+    <form onSubmit={handleSubmit(save)} noValidate className="flex max-w-md flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor={`${id}-name`}>{text.name}</Label>
+        <Input
           {...register('name')}
           id={`${id}-name`}
           type="text"
@@ -66,31 +70,33 @@ export function ExampleItemForm({ item, onClose }: ExampleItemFormProps) {
           aria-describedby={errors.name ? `${id}-name-error` : undefined}
         />
         {errors.name && (
-          <p id={`${id}-name-error`} role="alert">
+          <p id={`${id}-name-error`} role="alert" className="text-destructive text-sm">
             {errors.name.message}
           </p>
         )}
       </div>
-      <div>
-        <label htmlFor={`${id}-description`}>{text.description}</label>
-        <textarea
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor={`${id}-description`}>{text.description}</Label>
+        <Textarea
           {...register('description')}
           id={`${id}-description`}
           aria-invalid={errors.description ? true : undefined}
           aria-describedby={errors.description ? `${id}-description-error` : undefined}
         />
         {errors.description && (
-          <p id={`${id}-description-error`} role="alert">
+          <p id={`${id}-description-error`} role="alert" className="text-destructive text-sm">
             {errors.description.message}
           </p>
         )}
       </div>
-      <button type="submit" disabled={isPending}>
-        {isPending ? text.saving : text.save}
-      </button>
-      <button type="button" onClick={onClose}>
-        {text.cancel}
-      </button>
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isPending}>
+          {isPending ? text.saving : text.save}
+        </Button>
+        <Button type="button" variant="outline" onClick={onClose}>
+          {text.cancel}
+        </Button>
+      </div>
     </form>
   )
 }

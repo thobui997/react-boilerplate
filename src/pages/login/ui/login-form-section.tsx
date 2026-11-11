@@ -2,6 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useId, type ComponentProps } from 'react'
 import { useForm, type FieldError } from 'react-hook-form'
 import { messages } from '@/shared/i18n'
+import { Button } from '@/shared/ui/button'
+import { Input } from '@/shared/ui/input'
+import { Label } from '@/shared/ui/label'
 import { loginFormSchema, type LoginFormValues } from '../model/login-form-schema'
 
 interface LoginFormSectionProps {
@@ -19,16 +22,16 @@ function Field({ label, error, ...inputProps }: FieldProps) {
   const errorId = `${id}-error`
 
   return (
-    <div>
-      <label htmlFor={id}>{label}</label>
-      <input
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
         {...inputProps}
         id={id}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errorId : undefined}
       />
       {error && (
-        <p id={errorId} role="alert">
+        <p id={errorId} role="alert" className="text-destructive text-sm">
           {error.message}
         </p>
       )}
@@ -49,7 +52,7 @@ export function LoginFormSection({ onSubmit, isPending }: LoginFormSectionProps)
   })
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} noValidate>
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
       <Field
         {...register('username')}
         label={text.username}
@@ -67,9 +70,9 @@ export function LoginFormSection({ onSubmit, isPending }: LoginFormSectionProps)
         autoComplete="current-password"
         error={errors.password}
       />
-      <button type="submit" disabled={isPending}>
+      <Button type="submit" disabled={isPending}>
         {isPending ? text.submitting : text.submit}
-      </button>
+      </Button>
     </form>
   )
 }

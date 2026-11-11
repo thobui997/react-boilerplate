@@ -2,6 +2,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useId, useState, type ComponentProps } from 'react'
 import { useForm, useWatch, type FieldError } from 'react-hook-form'
 import { messages } from '@/shared/i18n'
+import { Button } from '@/shared/ui/button'
+import { Input } from '@/shared/ui/input'
+import { Label } from '@/shared/ui/label'
 import {
   createChangePasswordSchema,
   type ChangePasswordValues,
@@ -32,9 +35,9 @@ function PasswordField({ label, error, ...inputProps }: PasswordFieldProps) {
   const errorId = `${id}-error`
 
   return (
-    <div>
-      <label htmlFor={id}>{label}</label>
-      <input
+    <div className="flex flex-col gap-1.5">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
         {...inputProps}
         id={id}
         type="password"
@@ -42,7 +45,7 @@ function PasswordField({ label, error, ...inputProps }: PasswordFieldProps) {
         aria-describedby={error ? errorId : undefined}
       />
       {error && (
-        <p id={errorId} role="alert">
+        <p id={errorId} role="alert" className="text-destructive text-sm">
           {error.message}
         </p>
       )}
@@ -94,7 +97,7 @@ export function ChangePasswordForm({
       : text.actions.saveForced
 
   return (
-    <form onSubmit={onSubmit} noValidate>
+    <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
       <PasswordField
         {...register('currentPassword')}
         label={mode === 'forced' ? text.labels.temporary : text.labels.current}
@@ -113,7 +116,10 @@ export function ChangePasswordForm({
         autoComplete="new-password"
         error={errors.confirm}
       />
-      <ul aria-label={text.rules.title}>
+      <ul
+        aria-label={text.rules.title}
+        className="text-muted-foreground flex flex-col gap-1 text-sm"
+      >
         {rules.map((rule) => (
           <li key={rule.id}>
             <span aria-hidden="true">{rule.ok ? '✓' : '○'}</span> <span>{rule.label}</span>
@@ -121,15 +127,21 @@ export function ChangePasswordForm({
           </li>
         ))}
       </ul>
-      {formError && <p role="alert">{formError}</p>}
-      {onCancel && (
-        <button type="button" onClick={onCancel}>
-          {text.actions.cancel}
-        </button>
+      {formError && (
+        <p role="alert" className="text-destructive text-sm">
+          {formError}
+        </p>
       )}
-      <button type="submit" disabled={!canSubmit || isPending}>
-        {submitLabel}
-      </button>
+      <div className="flex gap-2">
+        {onCancel && (
+          <Button type="button" variant="outline" onClick={onCancel}>
+            {text.actions.cancel}
+          </Button>
+        )}
+        <Button type="submit" disabled={!canSubmit || isPending}>
+          {submitLabel}
+        </Button>
+      </div>
     </form>
   )
 }
