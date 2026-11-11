@@ -46,8 +46,9 @@ Sửa test là ngoại lệ và phải nêu lý do.
 
 **Thông báo và xác nhận:**
 
-- `src/main.tsx` gọi `setNotifier` nối với Sonner (thay đoạn comment gợi ý), `<Toaster>` đặt trong `AppProviders`.
-  Hợp đồng `notify` không đổi.
+- `src/main.tsx` gọi `setNotifier` nối với Sonner (thay đoạn comment gợi ý), `<Toaster />` render trong `src/main.tsx`
+  (không đặt trong `AppProviders`, để test dựng app bằng `renderRoute` vẫn dùng notifier mặc định). Hợp đồng `notify`
+  không đổi.
 - `window.confirm` ở `example-items-page` thành `AlertDialog`. `useLeaveConfirm` hiện không có nơi dùng nên không đổi;
   nếu sau này dùng, nhánh `useBlocker` hiện dialog qua `proceed`/`reset`, còn `beforeunload` vẫn là hộp thoại gốc của
   trình duyệt. Test đổi từ `spyOn(window, 'confirm')` sang bấm nút trong dialog; có thể cần polyfill jsdom
@@ -79,5 +80,6 @@ Sửa theo quyết định này: `CLAUDE.md` (dòng "UI là HTML ngữ nghĩa th
 - Khi triển khai, `npx shadcn@latest add` còn cài một gói npm tên `cn` (import `from "cn"`), ghi `^` cho gói mới và kéo
   `next-themes` cùng `sonner`. Cách xử lý (đổi import về `@/shared/lib/cn`, gỡ `cn` và `next-themes`, pin lại) nằm ở
   README, mục "Dùng và thêm component".
-- Hộp thoại xác nhận dùng lại chữ `Huỷ` của `messages.exampleItems.form.cancel`; chưa có nhóm `messages.ui` vì các
-  component đã thêm không sinh chữ tiếng Anh nào.
+- Hộp thoại xác nhận dùng lại chữ `Huỷ` của `messages.exampleItems.form.cancel`; nhóm `messages.ui` hiện chỉ có
+  `notifications`, nhãn vùng thông báo của Sonner (mặc định tiếng Anh, trình đọc màn hình sẽ đọc "Notifications"); các
+  component còn lại không sinh chữ tiếng Anh nào.

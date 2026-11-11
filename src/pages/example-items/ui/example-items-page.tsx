@@ -94,24 +94,26 @@ export function ExampleItemsPage() {
                   </time>
                 </TableCell>
                 {canWrite && (
-                  <TableCell className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditor({ kind: 'edit', item })}
-                    >
-                      {text.edit}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      disabled={remove.isPending}
-                      onClick={() => setRemoval({ item, open: true })}
-                    >
-                      {text.remove}
-                    </Button>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setEditor({ kind: 'edit', item })}
+                      >
+                        {text.edit}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        disabled={remove.isPending}
+                        onClick={() => setRemoval({ item, open: true })}
+                      >
+                        {text.remove}
+                      </Button>
+                    </div>
                   </TableCell>
                 )}
               </TableRow>

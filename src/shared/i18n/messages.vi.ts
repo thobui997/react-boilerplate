@@ -59,6 +59,10 @@ export const messages = {
   nav: {
     settings: 'Cài đặt',
   },
+  ui: {
+    // Nhãn vùng thông báo (Sonner) cho trình đọc màn hình; mặc định của thư viện là tiếng Anh.
+    notifications: 'Thông báo',
+  },
   settings: {
     title: 'Cài đặt',
     profile: {

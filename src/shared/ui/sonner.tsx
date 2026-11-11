@@ -6,6 +6,7 @@ import {
   OctagonXIcon,
   Loader2Icon,
 } from 'lucide-react'
+import { messages } from '@/shared/i18n'
 import { useTheme } from '@/shared/lib/theme'
 
 // Theme lấy từ store của repo (data-theme), không dùng next-themes như bản shadcn sinh sẵn.
@@ -15,6 +16,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={theme}
+      containerAriaLabel={messages.ui.notifications}
       className="toaster group"
       icons={{
         success: <CircleCheckIcon className="size-4" />,
