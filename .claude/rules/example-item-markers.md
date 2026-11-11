@@ -1,7 +1,6 @@
 ---
 paths:
   - "src/**"
-  - "e2e/**"
   - "steiger.config.ts"
   - "scripts/**"
 ---
@@ -35,7 +34,7 @@ This covers: imports used only by the sample, the route in
 `Permissions.ItemRead`/`ItemWrite` in `src/shared/lib/access/access.config.ts`,
 `ROUTES.ExampleItems`, `messages.exampleItems`, the landing rule in
 `src/entities/session/model/landing-path.ts`, the MSW handler wiring, test cases,
-e2e steps (`e2e/`), and the Steiger exception in `steiger.config.ts`.
+and the Steiger exception in `steiger.config.ts`.
 
 Exact rules enforced by `scripts/remove-example.mjs`:
 
@@ -46,7 +45,7 @@ Exact rules enforced by `scripts/remove-example.mjs`:
 - Blocks never nest; every opening marker has exactly one closing marker.
 - The script removes both marker lines and everything between them, then runs
   Prettier on the edited files, so leftover empty `{}`/`[]` are fine.
-- Only `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs` files under `src/` and `e2e/`
+- Only `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs` files under `src/`
   (skipping `node_modules`, `dist`) plus `steiger.config.ts` are scanned. Markers
   anywhere else (docs, config) are not processed.
 - The script validates every file before writing anything: a malformed marker
@@ -60,7 +59,7 @@ Exact rules enforced by `scripts/remove-example.mjs`:
 - After touching sample code or any fenced block, run
   `npm run verify:example-removal` (alias for `node scripts/verify-example-removal.mjs`).
   It copies the tree to a temp dir, runs the removal, checks no reference to
-  `example-item`/`ExampleItem` remains in `src/`, `e2e/`, `steiger.config.ts`,
+  `example-item`/`ExampleItem` remains in `src/`, `steiger.config.ts`,
   then runs `typecheck`, `lint`, `format:check`, `npm test` and `build` there.
 - Outside a marker block, never import from `@/pages/example-items` or
   `@/entities/example-item`.

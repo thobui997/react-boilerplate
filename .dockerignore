@@ -1,9 +1,7 @@
-# Ngữ cảnh build cần mã nguồn, cấu hình, e2e/ và scripts/ (tsc -b kiểm cả hai, xem tsconfig.json).
+# Ngữ cảnh build cần mã nguồn, cấu hình và scripts/ (tsc -b kiểm cả hai, xem tsconfig.json).
 node_modules/
 dist/
 coverage/
-playwright-report/
-test-results/
 *.tsbuildinfo
 .git/
 .github/

@@ -68,8 +68,7 @@ Sửa theo quyết định này: `CLAUDE.md` (dòng "UI là HTML ngữ nghĩa th
 
 ## Kiểm chứng
 
-`npm run typecheck && npm run lint && npm run format:check && npm test`, thêm `npm run build`, `npm run test:e2e`
-(CI không chạy e2e) và `npm run verify:example-removal` (bảo đảm code và chuỗi của sample vẫn nằm trong marker).
+`npm run typecheck && npm run lint && npm run format:check && npm test`, thêm `npm run build` và `npm run verify:example-removal` (bảo đảm code và chuỗi của sample vẫn nằm trong marker).
 
 ## Hệ quả
 

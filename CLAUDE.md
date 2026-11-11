@@ -6,7 +6,7 @@ react-hook-form + zod. Tài liệu tiếng Việt, định danh trong code tiế
 ## Lệnh
 
 - `npm run dev` · `npm run build` · `npm run typecheck` · `npm run lint` (ESLint + Steiger) · `npm run format` /
-  `npm run format:check` · `npm test` · `npm run test:e2e` (Playwright, API giả) · `npm run verify:example-removal`.
+  `npm run format:check` · `npm test` · `npm run verify:example-removal`.
 - Sau khi sửa code chạy: `npm run typecheck && npm run lint && npm run format:check && npm test`.
 
 ## Kiến trúc
@@ -37,7 +37,7 @@ Các file trong `.claude/rules/` chỉ được nạp khi làm việc với file
 | `react-query-layering.md`    | `src/**/*`                                                    | dto/mapper/request/query, mutation, `notify` |
 | `useeffect-discipline.md`    | `src/**/*.ts(x)`                                              | Khi nào được dùng `useEffect`, hook có sẵn   |
 | `auth-adapter.md`            | `shared/api`, session, sign-out, change-password, `test/auth` | Cơ chế auth, hợp đồng `AuthAdapter`          |
-| `example-item-markers.md`    | `src/`, `e2e/`, `steiger.config.ts`, `scripts/`               | Marker `// <example-item>` và cách gỡ mẫu    |
+| `example-item-markers.md`    | `src/`, `steiger.config.ts`, `scripts/`                       | Marker `// <example-item>` và cách gỡ mẫu    |
 
 ## Nơi tra cứu
 

@@ -9,15 +9,7 @@ const SELF_PATH = fileURLToPath(import.meta.url)
 const ROOT = resolve(dirname(SELF_PATH), '../..')
 const SELF = relative(ROOT, SELF_PATH).split(sep).join('/')
 
-const EXCLUDED_DIRS = new Set([
-  'node_modules',
-  'dist',
-  '.git',
-  '.superpowers',
-  'docs/superpowers',
-  'playwright-report',
-  'test-results',
-])
+const EXCLUDED_DIRS = new Set(['node_modules', 'dist', '.git', '.superpowers', 'docs/superpowers'])
 const EXCLUDED_FILES = new Set(['package-lock.json', 'tsconfig.tsbuildinfo', SELF])
 
 const DOMAIN_TRACE = /police|commune|\bbcx\b|Công an|ict-time|VITE_UNIT_NAME|báo cáo ngày/i

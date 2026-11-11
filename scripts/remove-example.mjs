@@ -5,7 +5,7 @@
 //
 // 1. Xóa các thư mục/file chỉ thuộc tính năng mẫu (EXAMPLE_PATHS).
 // 2. Cắt mọi đoạn nằm giữa hai dòng marker `// <example-item>` … `// </example-item>` (gồm cả hai dòng marker)
-//    trong file .ts/.tsx/.js/.jsx/.mjs ở `src/`, `e2e/` và `steiger.config.ts`.
+//    trong file .ts/.tsx/.js/.jsx/.mjs ở `src/` và `steiger.config.ts`.
 // 3. Chạy Prettier của repo trên các file đã sửa (cắt xong có thể còn `{\n}` hay `[\n]` thừa dòng).
 //
 // Kiểm tra toàn bộ marker trước khi ghi: marker mở thiếu đóng, đóng thừa, lồng nhau hoặc marker không đứng
@@ -21,7 +21,7 @@ const EXAMPLE_PATHS = [
   'src/pages/example-items',
   'src/test/msw/example-items.ts',
 ]
-const SCAN_DIRS = ['src', 'e2e']
+const SCAN_DIRS = ['src']
 const SCAN_FILES = ['steiger.config.ts']
 const SOURCE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs'])
 const SKIP_DIRS = new Set(['node_modules', 'dist'])

@@ -83,8 +83,7 @@ Background and trade-offs: `docs/decisions/0002-auth-contract-and-token-storage.
   and the other `src/shared/api/auth/*.test.ts`. A new adapter is added to the
   `cases` array of both contract tests.
 - Default-contract test helpers to update with a new backend: `signInAs`
-  (`src/test/msw/api.ts`), `makeMeDto` (`src/test/fixtures/user.ts`),
-  `e2e/support/mock-api.ts`.
+  (`src/test/msw/api.ts`), `makeMeDto` (`src/test/fixtures/user.ts`).
 - Storage key names (`STORAGE_KEYS`, `AUTH_CHANNEL`, `REFRESH_LOCK_NAME`) live in
   `src/shared/config/storage-keys.ts`; renaming them after deploy drops users' sessions.
 

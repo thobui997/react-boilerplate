@@ -28,7 +28,6 @@ export default defineConfig(({ mode }) => {
       css: false,
       // Test đầu tiên của mỗi file trang nạp (transform) route lazy nên chậm khi cả bộ chạy song song; 5s mặc định hay đỏ.
       testTimeout: 15_000,
-      exclude: ['e2e/**', 'node_modules/**'],
       // Trong Vitest `react-router` (CJS) và `react-router/dom` (ESM) bị nạp thành hai bản riêng (dual-package hazard)
       // nên context của Router không chung: useNavigate báo thiếu <Router>. Ép cả hai về bản ESM để dùng chung một bản.
       alias: [
