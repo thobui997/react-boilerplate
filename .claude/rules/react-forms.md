@@ -27,8 +27,8 @@ References: `src/pages/login/` (`model/login-form-schema.ts`, `ui/login-form-sec
 
 ## Inputs
 
-- Native inputs are plain HTML wired with `register`: spread `{...register('name')}`
-  onto `<input>`/`<textarea>`. Give each field `<label htmlFor>`, an id from
+- Inputs are wired with `register`: spread `{...register('name')}` onto
+  `Input`/`Textarea` (`@/shared/ui`; the `ref` reaches the native element). Give each field `Label` with `htmlFor`, an id from
   `useId()`, `aria-invalid` when it has an error and `aria-describedby` pointing
   to the `<p role="alert">` that shows `errors.<field>.message`.
 - A repeated field becomes a small local component that takes
@@ -67,12 +67,12 @@ References: `src/pages/login/` (`model/login-form-schema.ts`, `ui/login-form-sec
 
 ## Project bindings (fill in per project)
 
-- UI library form components: none yet. When the project adds one (README,
-  "Thêm UI cho dự án"), record here where the form-bound wrappers live and
-  which component is the reference implementation; keep presentational
-  primitives form-agnostic and wrap them.
-- Dialog with a form: none yet (`example-item-form.tsx` is inline,
-  confirmations use `window.confirm`). Record the dialog wrapper here when added.
+- UI library form components: `Input`, `Textarea`, `Label`, `Button` from `@/shared/ui`
+  (shadcn on Base UI). They are form-agnostic: wrap them in a small local field
+  component that spreads `register(...)` (`Field`, `PasswordField`). Reference:
+  `src/pages/example-items/ui/example-item-form.tsx`.
+- Dialog with a form: none yet (`example-item-form.tsx` is inline). Destructive
+  confirmations use `AlertDialog` (`pages/example-items/ui/remove-item-dialog.tsx`).
 - Schema location: `model/` of the owning slice (see `react-query-layering.md`).
 
 ## Checklist

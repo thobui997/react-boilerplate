@@ -2,11 +2,11 @@
 
 Template cho SPA React có đăng nhập và gọi API (app nội bộ, dashboard, trang quản trị). Hạ tầng đã dựng sẵn và có test:
 HTTP + auth (refresh single-flight, khóa liên tab), data router có guard theo quyền, cấu trúc Feature-Sliced Design,
-lint ép kiến trúc, CI, Docker/nginx có CSP. Template **không kèm thư viện UI**: các trang dùng HTML ngữ nghĩa thuần để
-dự án tự chọn bộ giao diện.
+lint ép kiến trúc, CI, Docker/nginx có CSP. UI dựng sẵn bằng **shadcn/ui trên Base UI** (`src/shared/ui`), Sonner cho
+thông báo, AlertDialog cho xác nhận.
 
 Stack: Vite, React 19, TypeScript strict, React Router 7 (data router), TanStack Query, axios, react-hook-form + zod,
-Tailwind 4 (chưa dùng class nào), Vitest + jsdom + MSW + Testing Library, Playwright, ESLint 10, Prettier, Steiger.
+Tailwind 4, shadcn/ui (Base UI, `base-nova`), Vitest + jsdom + MSW + Testing Library, Playwright, ESLint 10, Prettier, Steiger.
 
 Yêu cầu: Node `>=22.13` (xem `.nvmrc`), npm.
 
@@ -66,6 +66,7 @@ src/
     api/            http client, ApiError, RFC 7807, auth/ (cơ chế + AuthAdapter)
     config/         env, ROUTES, STORAGE_KEYS, APP_NAME
     lib/            access, notify, cn, hooks, form-errors, safe-redirect, theme, const-enum
+    ui/             component shadcn/ui (Button, Input, Label, Textarea, Table, AlertDialog, Sonner)
     i18n/           messages.vi.ts (mọi chuỗi UI dùng chung)
   test/             setup, renderRoute, MSW handlers, fixtures
 ```
@@ -135,30 +136,30 @@ lỗi kiểm tra thông tin như sai mật khẩu hiện tại), `isRefreshToken
 
 Lý do và đánh đổi lưu token: [ADR-0002](docs/decisions/0002-auth-contract-and-token-storage.md).
 
-## Thêm UI cho dự án
+## Dùng và thêm component
 
-Template không có `src/shared/ui`, thư viện component, icon hay toast. Khi dự án chọn bộ giao diện:
+UI dùng shadcn/ui dựng trên Base UI (`components.json`: `style: "base-nova"`, `iconLibrary: "lucide"`). Component nằm ở
+`src/shared/ui`, import dạng `@/shared/ui/button` (không barrel).
 
-1. **Component**: `components.json` đã cấu hình cho shadcn CLI (aliases `@/shared/ui`, `@/shared/lib/cn`, CSS
-   `src/app/styles/index.css`). `npx shadcn@latest add button` dùng `style: "base-nova"` (component dựng trên Base UI)
-   và `iconLibrary: "lucide"` đang ghi trong file. Muốn chọn khác, chạy `npx shadcn@latest init` hoặc sửa
-   `components.json` trước lần `add` đầu tiên. Thư mục `src/shared/ui` do CLI tạo.
-2. **Thay markup thuần** trong các trang (`src/pages/*/ui`), khung `src/app/layouts/app-shell`, và `ui/` của feature
-   bằng component của dự án. Chuỗi hiển thị vẫn lấy từ `messages.vi.ts`.
-3. **Thông báo**: mọi thông báo đi qua `notify` (`src/shared/lib/notify`). Mặc định là một phần tử `role="status"` tự
-   gỡ sau 5 giây. Nối thư viện toast một lần trong `src/main.tsx`:
-   ```ts
-   import { setNotifier } from '@/shared/lib/notify'
-   setNotifier({ info: toast.info, success: toast.success, error: toast.error })
-   ```
-   Xác nhận hành động nguy hiểm hiện dùng `window.confirm`; thay bằng dialog của dự án nếu muốn.
-4. **CSP**: nginx đặt `style-src 'self'` vì template không có style inline. Nếu thư viện chèn style inline (thẻ
-   `<style>` hoặc thuộc tính `style`, nhiều thư viện headless và toast làm vậy), đổi thành
-   `style-src 'self' 'unsafe-inline'` ở **mọi** dòng `add_header Content-Security-Policy` trong `deploy/nginx.conf`
-   (cấp server và từng `location`), rồi sửa `CANONICAL_CSP` và test "không có unsafe-inline" trong
-   `src/test/deploy-config.test.ts` cho khớp. Không nới `script-src`.
-   Tương tự, `connect-src 'self'` chặn API khác origin trong image Docker: nếu `VITE_API_BASE` trỏ tới origin khác
+1. **Thêm component**: `npx shadcn@latest add <tên>`. **Không chạy `shadcn init`**: nó ghi đè `src/app/styles/index.css`
+   (đổi `@custom-variant dark` sang class `.dark`). Sau mỗi lần `add`:
+   - CLI cài một gói npm tên `cn` và import `from "cn"`: đổi thành `@/shared/lib/cn`, gỡ gói đó (`npm uninstall cn`).
+   - Pin lại gói mới thành bản chính xác (CLI ghi `^`), gỡ `next-themes` nếu có (theme lấy từ `@/shared/lib/theme`).
+   - `git diff` `index.css`, `components.json`, `src/shared/lib`; chạy `npm run format`.
+   - Chữ tiếng Anh sinh sẵn chuyển sang `messages.vi.ts` (không để chữ cố định trong component).
+2. **Giao diện tối** theo `data-theme` (`public/theme-init.js`, `src/shared/lib/theme`): token màu ở `:root` và
+   `[data-theme=dark]` trong `src/app/styles/index.css` (`src/app/styles/tokens.test.ts` canh). Font là font hệ thống.
+3. **Thông báo**: mọi thông báo đi qua `notify` (`src/shared/lib/notify`); `src/main.tsx` nối nó với Sonner qua
+   `toastNotifier` (`src/app/bootstrap`) và render `<Toaster />`. Test dựng app bằng `renderRoute` vẫn dùng notifier
+   mặc định (phần tử `role="status"`).
+4. **Xác nhận hành động nguy hiểm**: `AlertDialog` (mẫu: `pages/example-items/ui/remove-item-dialog.tsx`).
+5. **CSP**: nginx đặt `style-src 'self' 'unsafe-inline'` vì Base UI và Sonner chèn style inline (vị trí popup, animation);
+   `script-src` vẫn chỉ `'self'`. Đổi CSP thì sửa **mọi** dòng `add_header Content-Security-Policy` trong
+   `deploy/nginx.conf` (cấp server và từng `location`) cùng `CANONICAL_CSP` trong `src/test/deploy-config.test.ts`.
+   `connect-src 'self'` chặn API khác origin trong image Docker: nếu `VITE_API_BASE` trỏ tới origin khác
    (vd. `https://api.example.com/v1`), thêm origin đó vào `connect-src` ở mọi dòng CSP.
+
+Quyết định và lý do: [ADR-0005](docs/decisions/0005-shadcn-base-ui.md).
 
 ## Khóa lưu trữ (`STORAGE_PREFIX`)
 

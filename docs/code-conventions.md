@@ -17,6 +17,7 @@ Bản tiếng Anh cho Claude Code nằm ở `.claude/rules/` (nạp theo đườ
 | `pages/example-items` (mẫu) | mutation tạo/sửa/xóa, schema form, form và bảng                                                         | —                                            |
 | `shared/api`                | `http`, `createHttpClient`, `ApiError`, `getErrorMessage`, RFC 7807, cơ chế auth + `AuthAdapter`         | mọi slice                                    |
 | `shared/lib`                | `access`, `notify`, `cn`, `hooks`, `form-errors`, `safe-redirect`, `theme`, `const-enum`                 | mọi slice                                    |
+| `shared/ui`                 | component shadcn/ui trên Base UI (`Button`, `Input`, `Label`, `Textarea`, `Table`, `AlertDialog`, `Sonner`) | mọi slice                                    |
 
 **Thăng hạng:** thao tác ghi dùng ở một trang thì ở lại trang (`pages/<page>/api/mutations.ts`). Khi trang thứ hai
 cần, chuyển thành `features/<verb>-<noun>`. Dữ liệu đọc dùng chung chuyển thành `entities/<noun>`. Feature chỉ còn một
@@ -54,8 +55,8 @@ consumer thì gộp về consumer đó.
 ## 4. Form
 
 - `useForm` + `zodResolver(schema)`; schema zod ở `model/` của slice, kiểu form là `z.infer<typeof schema>`.
-- Ô nhập dùng `register` với `<label htmlFor>`, `aria-invalid`, `aria-describedby` trỏ tới `<p role="alert">` của lỗi
-  (mẫu: `pages/example-items/ui/example-item-form.tsx`).
+- Ô nhập dùng `register` với `Label` (`htmlFor`), `Input`/`Textarea` của `@/shared/ui`, `aria-invalid`, `aria-describedby`
+  trỏ tới `<p role="alert">` của lỗi (mẫu: `pages/example-items/ui/example-item-form.tsx`).
 - Form chia thành nhiều component thì bọc bằng `<FormProvider>` và con dùng `useFormContext()`; không truyền
   `control`/`register` qua props.
 - Rời trang khi form còn thay đổi: `useLeaveConfirm`/`useBeforeUnload` (`shared/lib/hooks`).
@@ -78,7 +79,9 @@ consumer thì gộp về consumer đó.
   vi (tách component).
 - Trong component: hook → giá trị dẫn xuất → handler → JSX. Handler tên `handle<Event>`, prop callback `on<Event>`;
   boolean đọc như câu hỏi (`isPending`, `canEdit`).
-- UI của template là HTML ngữ nghĩa thuần, không class Tailwind hay style; dự án thêm thư viện UI theo README.
+- UI dùng component shadcn/ui ở `@/shared/ui/<tên>` (không barrel) và class Tailwind theo token; giữ cấu trúc ngữ nghĩa
+  (`<header>`, `<nav aria-label>`, `<main>`, `<section aria-labelledby>`, `role="alert"`/`role="status"`). Thêm component
+  bằng `npx shadcn@latest add` theo README (mục "Dùng và thêm component"); không chạy `shadcn init`.
 
 ## 7. Hằng, chuỗi và quyền
 

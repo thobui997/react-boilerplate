@@ -80,9 +80,10 @@ When generating or reviewing React code:
    is the pattern) or the query cache instead.
 4. **Use default parameters.** Set defaults in the destructured parameters
    (`({ size = 'md' }: Props)`), never with `defaultProps`.
-5. **Plain semantic HTML.** The template has no UI kit and no `shared/ui`:
-   use semantic elements, `<label htmlFor>`, `role="alert"`/`role="status"`, no
-   classes or inline styles until the project adds its UI library (see README).
+5. **Use `shared/ui`, keep semantics.** Build UI from the shadcn/Base UI components in
+   `src/shared/ui` (import `@/shared/ui/<name>`, no barrel) plus Tailwind token classes; do not add `style` props.
+   Keep semantic structure and a11y (`Label` + `htmlFor`, `role="alert"`/`role="status"`, `aria-invalid`,
+   `aria-describedby`). Add components with `npx shadcn@latest add`, never `shadcn init` (see README).
 
 ## 5. Review checklist
 

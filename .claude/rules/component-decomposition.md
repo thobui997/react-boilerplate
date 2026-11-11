@@ -87,7 +87,7 @@ share it. Use context only for state needed across many levels.
   or business logic moves out of its slice only when a second consumer
   genuinely needs it. A write follows the same rule: it stays in the page until
   a second page or `app` needs it (see `react-query-layering.md`).
-- **Exception: pure presentational wrappers.** Once the project adds a UI kit,
+- **Exception: pure presentational wrappers.** The UI kit lives in `src/shared/ui`;
   a wrapper that only composes its primitives and takes generic props (no
   entity types, no business logic) may go straight into `shared/`. Being wrong
   costs one file move later.

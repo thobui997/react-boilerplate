@@ -20,7 +20,9 @@ react-hook-form + zod. Tài liệu tiếng Việt, định danh trong code tiế
   Đích của `landingPathFor` không được cần quyền người dùng chưa có (nếu không sẽ chuyển hướng vòng).
 - Quyền khai báo bằng `Roles`/`Permissions` ở `src/shared/lib/access/access.config.ts`, kiểm bằng `can`/`canAny`/`hasRole`.
 - Mọi chuỗi UI ở `src/shared/i18n/messages.vi.ts`, import `messages` từ `@/shared/i18n`.
-- UI là HTML ngữ nghĩa thuần, không có `shared/ui`; thông báo qua `notify` (`@/shared/lib/notify`).
+- UI dùng shadcn/ui trên Base UI ở `src/shared/ui` (import `@/shared/ui/<tên>`, thêm bằng `npx shadcn@latest add`, không
+  chạy `shadcn init`); giữ HTML ngữ nghĩa và a11y (`role="alert"`, `aria-invalid`, `aria-describedby`); thông báo qua
+  `notify` (đã nối Sonner trong `src/main.tsx`), xác nhận bằng `AlertDialog`; dark mode theo `data-theme`.
 
 ## Quy tắc nạp tự động
 
@@ -30,7 +32,7 @@ Các file trong `.claude/rules/` chỉ được nạp khi làm việc với file
 | ---------------------------- | ------------------------------------------------------------- | -------------------------------------------- |
 | `component-decomposition.md` | `src/**/*.ts(x)`                                              | Giới hạn 300 dòng, tách theo trách nhiệm     |
 | `react-clean-code.md`        | `src/**/*.ts(x)`                                              | Đặt tên, hàm nhỏ, lỗi, test                  |
-| `react-component-design.md`  | `src/**/*.tsx`                                                | Số props, composition, HTML thuần            |
+| `react-component-design.md`  | `src/**/*.tsx`                                                | Số props, composition, shared/ui             |
 | `react-forms.md`             | `src/**/*.ts(x)`                                              | react-hook-form + zod, lỗi 422 theo ô        |
 | `react-query-layering.md`    | `src/**/*`                                                    | dto/mapper/request/query, mutation, `notify` |
 | `useeffect-discipline.md`    | `src/**/*.ts(x)`                                              | Khi nào được dùng `useEffect`, hook có sẵn   |

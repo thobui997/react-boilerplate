@@ -1,6 +1,6 @@
 # ADR-0005: shadcn/ui trên Base UI là bộ giao diện mặc định
 
-Trạng thái: Đề xuất (chờ duyệt)
+Trạng thái: Đã chấp nhận
 
 ## Bối cảnh
 
@@ -76,3 +76,8 @@ Sửa theo quyết định này: `CLAUDE.md` (dòng "UI là HTML ngữ nghĩa th
   `messages.ui`.
 - `style-src 'unsafe-inline'` là mức bảo vệ thấp hơn trước cho CSS (không ảnh hưởng thực thi script).
 - Chuỗi UI của các trang mẫu vẫn lấy từ `messages` như cũ, nên phần lớn test không phải đổi chữ.
+- Khi triển khai, `npx shadcn@latest add` còn cài một gói npm tên `cn` (import `from "cn"`), ghi `^` cho gói mới và kéo
+  `next-themes` cùng `sonner`. Cách xử lý (đổi import về `@/shared/lib/cn`, gỡ `cn` và `next-themes`, pin lại) nằm ở
+  README, mục "Dùng và thêm component".
+- Hộp thoại xác nhận dùng lại chữ `Huỷ` của `messages.exampleItems.form.cancel`; chưa có nhóm `messages.ui` vì các
+  component đã thêm không sinh chữ tiếng Anh nào.
