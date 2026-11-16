@@ -1,55 +1,65 @@
-# CLAUDE.md
+# React Boilerplate
 
-Template SPA React: Vite, React 19, TypeScript strict, React Router 7 (data router), TanStack Query, axios,
-react-hook-form + zod. Tài liệu tiếng Việt, định danh trong code tiếng Anh.
+## Project Overview (WHAT & WHY)
 
-## Lệnh
+- **Purpose:** Reusable SPA template for authenticated apps that call a backend API (internal tools, dashboards, admin panels). Auth, routing guards, HTTP client, FSD structure, architecture linting, CI, and a hardened Docker/nginx image come pre-built and tested.
+- **Tech Stack:** Vite, React 19, TypeScript (strict), React Router 7 (data router), TanStack Query, axios, react-hook-form + zod, Tailwind 4, shadcn/ui on Base UI, Vitest + jsdom + MSW + Testing Library, ESLint, Prettier, Steiger (FSD lint), Docker + nginx. Node `>=22.13`.
+- **Repo Map:**
+  - `src/app/` - Composition root: providers, router (routes, guard loaders, session-event wiring), layouts, navigation, styles
+  - `src/pages/` - Route-level screens (login, change-password, settings, not-found, example-items)
+  - `src/features/` - User actions (sign-out, change-password, toggle-theme)
+  - `src/entities/` - Domain models (session, example-item)
+  - `src/shared/` - `api` (HTTP client, `AuthAdapter`), `config`, `i18n`, `lib` (access, notify, hooks), `ui` (shadcn/ui)
+  - `src/test/` - Test setup, `renderRoute`, MSW handlers, fixtures
+  - `.claude/rules/` - Path-scoped rules, auto-loaded only when editing files matching each rule's `paths:` header
+  - `docs/` - Code conventions, ADRs (`docs/decisions/`), example-feature removal guide
+  - `deploy/`, `Dockerfile`, `.github/workflows/` - nginx config (with CSP), image build, CI and image publishing
+  - `scripts/` - `remove-example.mjs` and `verify-example-removal.mjs`
 
-- `npm run dev` · `npm run build` · `npm run typecheck` · `npm run lint` (ESLint + Steiger) · `npm run format` /
-  `npm run format:check` · `npm test` · `npm run verify:example-removal`.
-- Sau khi sửa code chạy: `npm run typecheck && npm run lint && npm run format:check && npm test`.
+## Commands (HOW)
 
-## Kiến trúc
+- **Build:** `npm run build` (`tsc -b && vite build`)
+- **Dev Server:** `npm run dev` (proxies `/api` to `VITE_DEV_API_TARGET`; copy `.env.example` to `.env` first)
+- **Test (Single):** `npx vitest run <path/to/file.test.ts>` or `npx vitest run -t "<test name>"` (all tests: `npm test`)
+- **Lint & Format:** `npm run typecheck && npm run lint && npm run format:check` (Always run before completing tasks; `npm run format` auto-fixes; lint runs ESLint then Steiger)
 
-- Layer FSD `app → pages → features → entities → shared`, import một chiều, không import chéo slice cùng layer; không
-  có `widgets` (khung ở `src/app/layouts`, menu ở `src/app/navigation`).
-- Pages First: code ở page cho tới khi có consumer thứ hai, rồi mới tách `entities/<noun>` hoặc `features/<verb>-<noun>`.
-- Slice gồm `api/`, `model/`, `ui/`; chỉ lộ ra qua `index.ts`, import từ ngoài bằng alias `@/`.
-- `shared/api` không import `app`: nó phát sự kiện, `src/app/router/wire-session-events.ts` điều hướng.
-- Guard là loader (`src/app/router/loaders.ts`), thứ tự phiên → đổi mật khẩu → quyền; loader không tải dữ liệu trang.
-  Đích của `landingPathFor` không được cần quyền người dùng chưa có (nếu không sẽ chuyển hướng vòng).
-- Quyền khai báo bằng `Roles`/`Permissions` ở `src/shared/lib/access/access.config.ts`, kiểm bằng `can`/`canAny`/`hasRole`.
-- Mọi chuỗi UI ở `src/shared/i18n/messages.vi.ts`, import `messages` từ `@/shared/i18n`.
-- UI dùng shadcn/ui trên Base UI ở `src/shared/ui` (import `@/shared/ui/<tên>`, thêm bằng `npx shadcn@latest add`, không
-  chạy `shadcn init`); giữ HTML ngữ nghĩa và a11y (`role="alert"`, `aria-invalid`, `aria-describedby`); thông báo qua
-  `notify` (đã nối Sonner trong `src/main.tsx`), xác nhận bằng `AlertDialog`; dark mode theo `data-theme`.
+## Engineering & Workflow Rules
 
-## Quy tắc nạp tự động
+- **Plan First:** For complex tasks or multi-file changes, always inspect related code and outline a plan before writing code.
+- **Verification:** Never mark a task as complete without running tests or builds to verify correctness. Full gate: `npm run typecheck && npm run lint && npm run format:check && npm test`.
+- **Minimal Changes:** Modify only code directly relevant to the request while respecting the existing architecture.
+- **Git Conventions:** Follow Conventional Commits (`feat:`, `fix:`, `refactor:`, etc.).
+- **Architecture (FSD):**
+  - Layers `app → pages → features → entities → shared`; imports go one way only, never across slices of the same layer. There is no `widgets` layer (layouts live in `src/app/layouts`, menu in `src/app/navigation`).
+  - Pages First: keep code in the page until a second consumer exists, then extract `entities/<noun>` or `features/<verb>-<noun>`.
+  - Each slice has `api/`, `model/`, `ui/` and is exposed only via `index.ts`; import from outside through the `@/` alias.
+  - `shared/api` must not import `app`: it emits events and `src/app/router/wire-session-events.ts` handles navigation.
+- **Routing & Access:**
+  - Guards are loaders (`src/app/router/loaders.ts`), checked in order: session → password change → permissions. Loaders never fetch page data.
+  - Every destination of `landingPathFor` must be reachable without permissions the user lacks, or redirects will loop.
+  - Declare `Roles`/`Permissions` in `src/shared/lib/access/access.config.ts`; check with `can`/`canAny`/`hasRole`.
+- **UI & i18n:**
+  - All UI strings live in `src/shared/i18n/messages.vi.ts`; import `messages` from `@/shared/i18n`.
+  - UI uses shadcn/ui on Base UI in `src/shared/ui` (import `@/shared/ui/<name>`). Add components with `npx shadcn@latest add`; never run `shadcn init`.
+  - Keep semantic HTML and a11y (`role="alert"`, `aria-invalid`, `aria-describedby`); toasts go through `notify`; destructive confirmations use `AlertDialog`; dark mode follows `data-theme`.
+- **Language:** Project docs are in Vietnamese; identifiers in code are in English.
+- **Template Maintenance:**
+  - `src/test/no-domain-traces.test.ts` guards against leftover domain keywords from the source project (it scans `.claude/` and this file); projects created from the template may delete it.
+  - Do not edit `docs/superpowers/` or `.superpowers/`.
+  - If you change `STORAGE_PREFIX`, also update `public/theme-init.js` (`src/shared/config/storage-keys.test.ts` enforces this).
+  - The CSP in `deploy/nginx.conf` is enforced by `src/test/deploy-config.test.ts`: change both together.
+  - Example feature code is wrapped in `// <example-item>` markers; see `docs/removing-example-item.md` and run `npm run verify:example-removal` after touching them.
 
-Các file trong `.claude/rules/` chỉ được nạp khi làm việc với file khớp `paths:` ở đầu mỗi file.
+## Progressive Disclosure (Deep-dive documentation - Read on demand)
 
-| File                         | Nạp khi sửa                                                   | Mục đích                                     |
-| ---------------------------- | ------------------------------------------------------------- | -------------------------------------------- |
-| `component-decomposition.md` | `src/**/*.ts(x)`                                              | Giới hạn 300 dòng, tách theo trách nhiệm     |
-| `react-clean-code.md`        | `src/**/*.ts(x)`                                              | Đặt tên, hàm nhỏ, lỗi, test                  |
-| `react-component-design.md`  | `src/**/*.tsx`                                                | Số props, composition, shared/ui             |
-| `react-forms.md`             | `src/**/*.ts(x)`                                              | react-hook-form + zod, lỗi 422 theo ô        |
-| `react-query-layering.md`    | `src/**/*`                                                    | dto/mapper/request/query, mutation, `notify` |
-| `useeffect-discipline.md`    | `src/**/*.ts(x)`                                              | Khi nào được dùng `useEffect`, hook có sẵn   |
-| `auth-adapter.md`            | `shared/api`, session, sign-out, change-password, `test/auth` | Cơ chế auth, hợp đồng `AuthAdapter`          |
-| `example-item-markers.md`    | `src/`, `steiger.config.ts`, `scripts/`                       | Marker `// <example-item>` và cách gỡ mẫu    |
+Instead of cluttering this file, read these specific files when working on corresponding modules:
 
-## Nơi tra cứu
-
-- `README.md`: khởi tạo dự án, biến môi trường, đổi backend, thêm UI, triển khai.
-- `docs/code-conventions.md`: quy ước mã nguồn (tiếng Việt, cùng nội dung với các rule).
-- `docs/decisions/`: ADR (FSD, hợp đồng auth và lưu token, data router).
-- `docs/removing-example-item.md`: gỡ tính năng mẫu và quy ước marker.
-
-## Bảo trì template
-
-- `src/test/no-domain-traces.test.ts` canh không còn từ khóa nghiệp vụ của dự án nguồn (quét cả `.claude/` và file
-  này); dự án tạo từ template có thể xóa test đó.
-- Không sửa `docs/superpowers/` và `.superpowers/`.
-- Đổi `STORAGE_PREFIX` thì sửa cả `public/theme-init.js` (`src/shared/config/storage-keys.test.ts` canh).
-- CSP trong `deploy/nginx.conf` được `src/test/deploy-config.test.ts` canh: sửa CSP thì sửa test cùng lúc.
+- Setup, env vars, backend swap, adding UI, deployment: `README.md`
+- Code conventions (same content as the rules below): `docs/code-conventions.md`
+- Architecture decisions (FSD, auth contract and token storage, data router, shadcn/Base UI): `docs/decisions/`
+- Removing the example feature and marker conventions: `docs/removing-example-item.md`
+- Path-scoped rules in `.claude/rules/` (auto-loaded on matching files):
+  - `component-decomposition.md`, `react-clean-code.md`, `react-component-design.md` - 300-line limit, naming, small functions, props, composition
+  - `react-forms.md`, `react-query-layering.md`, `useeffect-discipline.md` - react-hook-form + zod, dto/mapper/request/query layers, `useEffect` usage
+  - `auth-adapter.md` - auth mechanism and the `AuthAdapter` contract (`shared/api`, session, sign-out, change-password)
+  - `example-item-markers.md` - `// <example-item>` markers
