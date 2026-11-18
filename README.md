@@ -6,7 +6,7 @@ lint ép kiến trúc, CI, Docker/nginx có CSP. UI dựng sẵn bằng **shadcn
 thông báo, AlertDialog cho xác nhận.
 
 Stack: Vite, React 19, TypeScript strict, React Router 7 (data router), TanStack Query, axios, react-hook-form + zod,
-Tailwind 4, shadcn/ui (Base UI, `base-nova`), Vitest + jsdom + MSW + Testing Library, Playwright, ESLint 10, Prettier, Steiger.
+Tailwind 4, shadcn/ui (Base UI, `base-nova`), Vitest + jsdom + MSW + Testing Library, fast-check (property test), Playwright, ESLint 10, Prettier, Steiger.
 
 Yêu cầu: Node `>=22.13` (xem `.nvmrc`), npm.
 
@@ -37,11 +37,18 @@ hiện.
 | `npm run typecheck`               | `tsc --noEmit`                                                            |
 | `npm run lint`                    | `eslint .` rồi `steiger ./src` (luật layer FSD)                           |
 | `npm run format` / `format:check` | Prettier ghi / kiểm                                                       |
-| `npm test` / `npm run test:watch` | Vitest (unit + component, API giả bằng MSW)                               |
+| `npm test` / `npm run test:watch` | Vitest (unit + component + property test, API giả bằng MSW)               |
 | `npm run test:e2e`                | Playwright; tự chạy `npm run dev`, API giả bằng `page.route`              |
 | `npm run verify:example-removal`  | Thử gỡ `example-item` trên bản sao tạm rồi chạy typecheck/lint/test/build |
 
 Lần đầu chạy e2e cần cài trình duyệt: `npx playwright install chromium`.
+
+Property test (`*.property.test.ts`, cạnh code, viết bằng `fast-check` qua `@fast-check/vitest`) chạy chung với `npm test`: thay vì
+vài ví dụ chọn tay, chúng sinh hàng trăm đầu vào ngẫu nhiên để thử một tính chất luôn đúng. Mẫu có sẵn: `safeRedirect`
+(không bao giờ chuyển hướng ra ngoài), `landingPathFor` (mọi đích vào được, không chuyển hướng vòng) và luật mật khẩu
+(`evaluatePasswordPolicy`). Khi một tính chất fail, fast-check in `seed` và ví dụ phản chứng đã thu gọn: sửa code rồi
+thêm ví dụ đó thành test thường. Chạy lại lần sau với seed mới có thể qua: đó không phải test flaky mà là phản chứng hiếm;
+để tái hiện, thêm `{ seed, path, endOnFailure: true }` đã in ra vào tham số thứ hai của `test.prop`.
 
 ## Biến môi trường
 

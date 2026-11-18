@@ -15,7 +15,8 @@ expensive ones never run on code that does not compile.
 npm run typecheck && npm run lint && npm run format:check && npm test
 ```
 
-`npm run format` auto-fixes formatting; re-run the gate afterwards. Lint is ESLint then
+`npm run format` auto-fixes formatting; re-run the gate afterwards. `npm test` includes the property tests (`*.property.test.ts`, fast-check): a failure prints a
+`seed` and a shrunk counterexample, which is a real bug until proven otherwise. Lint is ESLint then
 Steiger (FSD layer rules): an import-direction error is a real design error, fix the
 import, do not disable the rule.
 
@@ -89,6 +90,7 @@ own screenshot is not enough: you have nothing to compare it to. Run the `verify
 | `STORAGE_PREFIX` | also edit `public/theme-init.js`; `storage-keys.test.ts` enforces it |
 | CSP in `deploy/nginx.conf` | change `src/test/deploy-config.test.ts` together; both must pass |
 | Guards or `landingPathFor` | `auth` and `change-password` e2e specs; every landing path must be reachable without missing permissions or the redirect loops |
+| `safeRedirect`, `landingPathFor`, route guards or `Permissions`, `evaluatePasswordPolicy` | Their property tests (`safe-redirect.property`, `landing-reachability.property`, `password-policy.property`) run in `npm test`: read a failure's counterexample, fix the code, add it as a plain example test. Never narrow the generator. Adding another pure function with an invariant? Add a property test and break the code once to see it fail. |
 | `AuthAdapter` contract or endpoints | update `signInAs`, `makeMeDto` and `e2e/support/mock-api.ts` (see `.claude/rules/auth-adapter.md`) |
 | `src/shared/i18n/messages.vi.ts` | e2e locates elements by these strings; run e2e and refresh `visual` baselines if copy changed |
 
@@ -103,6 +105,11 @@ own screenshot is not enough: you have nothing to compare it to. Run the `verify
 - **Flaky tests are bugs.** Never skip a test, add `waitForTimeout` or sleeps, or raise retries
   to pass. Use web-first assertions (`await expect(locator)...`), which retry on their own. If
   you cannot find the root cause, delete the test and record why in the report.
+  **Exception: property tests (`*.property.test.ts`).** They use a new random seed every run, so one
+  that fails once and passes on rerun is not flaky: it found a rare counterexample. Reproduce it by
+  adding the printed `{ seed, path, endOnFailure: true }` to that `test.prop`'s options (second
+  argument), confirm the same counterexample returns, fix the code, add the counterexample as a plain
+  example test, then remove the pinned seed. Never delete, skip or retry-until-green a property test.
 - **Report evidence, not confidence.** End with: each command run and its result (counts, not
   "looks fine"), what you looked at in step 4, baselines you refreshed, and what you did not
   verify (for example: no real backend, only Chromium, only Linux baselines).

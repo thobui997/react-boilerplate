@@ -105,6 +105,10 @@ consumer thì gộp về consumer đó.
 - Bọc thư viện bên thứ ba sau lớp mỏng (axios → `shared/api`, toast → `notify`).
 - Test đặt cạnh code (`*.test.ts[x]`), kiểm hành vi người dùng thấy; API giả bằng MSW (`src/test/msw`), trang test bằng
   `renderRoute` (`src/test/render.tsx`). Hạ tầng test chung ở `src/test/`.
+- Hàm thuần có tính chất luôn đúng (phân tích, chính sách, chuyển hướng, phân quyền) thêm property test
+  `*.property.test.ts` cạnh code, dùng `test.prop` của `@fast-check/vitest`. Phát biểu tính chất ("mọi đầu vào thì…"), không
+  chép lại phép tính của code. Ví dụ phản chứng là lỗi thật: sửa code, thêm nó thành test ví dụ, không thu hẹp bộ sinh. Tái hiện bằng `{ seed, path, endOnFailure: true }` fast-check đã in
+  (tham số thứ hai của `test.prop`); chạy lại với seed mới mà qua không có nghĩa là test flaky.
 - Refactor commit riêng với tính năng. Trước khi commit: `npm run typecheck && npm run lint && npm run format:check &&
 npm test`.
 

@@ -3,7 +3,7 @@
 ## Project Overview (WHAT & WHY)
 
 - **Purpose:** Reusable SPA template for authenticated apps that call a backend API (internal tools, dashboards, admin panels). Auth, routing guards, HTTP client, FSD structure, architecture linting, CI, and a hardened Docker/nginx image come pre-built and tested.
-- **Tech Stack:** Vite, React 19, TypeScript (strict), React Router 7 (data router), TanStack Query, axios, react-hook-form + zod, Tailwind 4, shadcn/ui on Base UI, Vitest + jsdom + MSW + Testing Library, Playwright (e2e), ESLint, Prettier, Steiger (FSD lint), Docker + nginx. Node `>=22.13`.
+- **Tech Stack:** Vite, React 19, TypeScript (strict), React Router 7 (data router), TanStack Query, axios, react-hook-form + zod, Tailwind 4, shadcn/ui on Base UI, Vitest + jsdom + MSW + Testing Library, fast-check (property tests), Playwright (e2e), ESLint, Prettier, Steiger (FSD lint), Docker + nginx. Node `>=22.13`.
 - **Repo Map:**
   - `src/app/` - Composition root: providers, router (routes, guard loaders, session-event wiring), layouts, navigation, styles
   - `src/pages/` - Route-level screens (login, change-password, settings, not-found, example-items)
@@ -23,7 +23,7 @@
 
 - **Build:** `npm run build` (`tsc -b && vite build`)
 - **Dev Server:** `npm run dev` (proxies `/api` to `VITE_DEV_API_TARGET`; copy `.env.example` to `.env` first)
-- **Test (Single):** `npx vitest run <path/to/file.test.ts>` or `npx vitest run -t "<test name>"` (all tests: `npm test`)
+- **Test (Single):** `npx vitest run <path/to/file.test.ts>` or `npx vitest run -t "<test name>"` (all tests: `npm test`; property tests are `*.property.test.ts` using `@fast-check/vitest`, e.g. `npx vitest run safe-redirect.property`)
 - **E2E:** `npm run test:e2e` (starts `npm run dev`, no backend needed; first time `npx playwright install chromium`; intentional UI change: `npm run test:e2e -- --update-snapshots` and review the image diff)
 - **Lint & Format:** `npm run typecheck && npm run lint && npm run format:check` (Always run before completing tasks; `npm run format` auto-fixes; lint runs ESLint then Steiger)
 

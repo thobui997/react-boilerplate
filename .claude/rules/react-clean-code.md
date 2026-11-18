@@ -126,6 +126,18 @@ When principles conflict, choose the option that is simplest to read and change.
 - One concept per test. Name tests by behavior.
 - Pure logic (mappers, policies, rules) gets unit tests. Prefer extracting logic
   over mocking heavily.
+- **Property tests** (`fast-check`) for pure functions with an invariant (parsing, policies,
+  redirects, access checks): `<name>.property.test.ts` next to the code, written with
+  `test.prop([...arbitraries])` from `@fast-check/vitest`. State what must hold for every input
+  ("the result is always same-origin", "every landing path passes its own guard"), never restate the
+  implementation. Bias generators toward hostile input (the characters the code cares about), not
+  only random strings. They run in `npm test`.
+- A property that fails prints a `seed`, a `path` and a shrunk counterexample. Treat it as a real bug
+  first: reproduce it by passing `{ seed, path, endOnFailure: true }` as the options of that
+  `test.prop` (a rerun with a fresh seed may pass; that is not flakiness), fix the code, add the
+  counterexample as a plain example test, remove the pinned seed, and never narrow the generator or
+  weaken the property just to get green. Check a new property by temporarily breaking the code and
+  confirming it fails.
 
 ## 10. Boy Scout Rule and refactoring
 
