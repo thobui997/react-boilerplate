@@ -30,6 +30,8 @@ const EXCLUDED = new Set([
   '.git',
   'dist',
   '.superpowers',
+  'test-results',
+  'playwright-report',
   'coverage',
   'tsconfig.tsbuildinfo',
 ])
@@ -41,7 +43,7 @@ const STEPS = [
   ['run', 'build'],
 ]
 const LEFTOVER = /example-?items?\b|exampleItem|ExampleItem/
-const LEFTOVER_SCAN = ['src', 'steiger.config.ts']
+const LEFTOVER_SCAN = ['src', 'e2e', 'steiger.config.ts']
 
 function run(command, args, cwd) {
   console.log(`\n$ ${[command, ...args].join(' ')}`)
@@ -100,7 +102,7 @@ function verify(workDir) {
   if (leftovers.length > 0) {
     throw new Error(`Còn tham chiếu tới example-item sau khi gỡ:\n${leftovers.join('\n')}`)
   }
-  console.log('\nKhông còn tham chiếu tới example-item trong src/, steiger.config.ts.')
+  console.log('\nKhông còn tham chiếu tới example-item trong src/, e2e/, steiger.config.ts.')
 
   for (const args of STEPS) {
     if (!run('npm', args, workDir))

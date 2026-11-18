@@ -1,6 +1,7 @@
 ---
 paths:
   - "src/**"
+  - "e2e/**"
   - "steiger.config.ts"
   - "scripts/**"
 ---
@@ -17,6 +18,8 @@ Owned paths, deleted whole by the removal script:
 - `src/entities/example-item/`
 - `src/pages/example-items/`
 - `src/test/msw/example-items.ts`
+- `e2e/example-items.spec.ts`
+- `e2e/support/example-items-mock.ts`
 
 ## Marker rule
 
@@ -45,7 +48,7 @@ Exact rules enforced by `scripts/remove-example.mjs`:
 - Blocks never nest; every opening marker has exactly one closing marker.
 - The script removes both marker lines and everything between them, then runs
   Prettier on the edited files, so leftover empty `{}`/`[]` are fine.
-- Only `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs` files under `src/`
+- Only `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs` files under `src/` and `e2e/`
   (skipping `node_modules`, `dist`) plus `steiger.config.ts` are scanned. Markers
   anywhere else (docs, config) are not processed.
 - The script validates every file before writing anything: a malformed marker
@@ -59,7 +62,7 @@ Exact rules enforced by `scripts/remove-example.mjs`:
 - After touching sample code or any fenced block, run
   `npm run verify:example-removal` (alias for `node scripts/verify-example-removal.mjs`).
   It copies the tree to a temp dir, runs the removal, checks no reference to
-  `example-item`/`ExampleItem` remains in `src/`, `steiger.config.ts`,
+  `example-item`/`ExampleItem` remains in `src/`, `e2e/`, `steiger.config.ts`,
   then runs `typecheck`, `lint`, `format:check`, `npm test` and `build` there.
 - Outside a marker block, never import from `@/pages/example-items` or
   `@/entities/example-item`.

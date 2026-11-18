@@ -3,7 +3,7 @@
 ## Project Overview (WHAT & WHY)
 
 - **Purpose:** Reusable SPA template for authenticated apps that call a backend API (internal tools, dashboards, admin panels). Auth, routing guards, HTTP client, FSD structure, architecture linting, CI, and a hardened Docker/nginx image come pre-built and tested.
-- **Tech Stack:** Vite, React 19, TypeScript (strict), React Router 7 (data router), TanStack Query, axios, react-hook-form + zod, Tailwind 4, shadcn/ui on Base UI, Vitest + jsdom + MSW + Testing Library, ESLint, Prettier, Steiger (FSD lint), Docker + nginx. Node `>=22.13`.
+- **Tech Stack:** Vite, React 19, TypeScript (strict), React Router 7 (data router), TanStack Query, axios, react-hook-form + zod, Tailwind 4, shadcn/ui on Base UI, Vitest + jsdom + MSW + Testing Library, Playwright (e2e), ESLint, Prettier, Steiger (FSD lint), Docker + nginx. Node `>=22.13`.
 - **Repo Map:**
   - `src/app/` - Composition root: providers, router (routes, guard loaders, session-event wiring), layouts, navigation, styles
   - `src/pages/` - Route-level screens (login, change-password, settings, not-found, example-items)
@@ -11,7 +11,9 @@
   - `src/entities/` - Domain models (session, example-item)
   - `src/shared/` - `api` (HTTP client, `AuthAdapter`), `config`, `i18n`, `lib` (access, notify, hooks), `ui` (shadcn/ui)
   - `src/test/` - Test setup, `renderRoute`, MSW handlers, fixtures
+  - `e2e/` - Playwright specs (API mocked with `page.route` in `e2e/support/mock-api.ts`, visual baselines in `e2e/__screenshots__/`)
   - `.claude/rules/` - Path-scoped rules, auto-loaded only when editing files matching each rule's `paths:` header
+  - `.claude/skills/verify/` - The `verify` skill: how to prove a change works (gate, e2e, drive the real app)
   - `docs/` - Code conventions, ADRs (`docs/decisions/`), example-feature removal guide
   - `deploy/`, `Dockerfile`, `.github/workflows/` - nginx config (with CSP), image build, CI and image publishing
   - `scripts/` - `remove-example.mjs` and `verify-example-removal.mjs`
@@ -21,12 +23,13 @@
 - **Build:** `npm run build` (`tsc -b && vite build`)
 - **Dev Server:** `npm run dev` (proxies `/api` to `VITE_DEV_API_TARGET`; copy `.env.example` to `.env` first)
 - **Test (Single):** `npx vitest run <path/to/file.test.ts>` or `npx vitest run -t "<test name>"` (all tests: `npm test`)
+- **E2E:** `npm run test:e2e` (starts `npm run dev`, no backend needed; first time `npx playwright install chromium`; intentional UI change: `npm run test:e2e -- --update-snapshots` and review the image diff)
 - **Lint & Format:** `npm run typecheck && npm run lint && npm run format:check` (Always run before completing tasks; `npm run format` auto-fixes; lint runs ESLint then Steiger)
 
 ## Engineering & Workflow Rules
 
 - **Plan First:** For complex tasks or multi-file changes, always inspect related code and outline a plan before writing code.
-- **Verification:** Never mark a task as complete without running tests or builds to verify correctness. Full gate: `npm run typecheck && npm run lint && npm run format:check && npm test`.
+- **Verification:** Never mark a task as complete without running tests or builds to verify correctness. Full gate: `npm run typecheck && npm run lint && npm run format:check && npm test`. Run the `verify` skill (`.claude/skills/verify/SKILL.md`) before committing; it adds the build and e2e and tells you which extra checks a given change needs.
 - **Minimal Changes:** Modify only code directly relevant to the request while respecting the existing architecture.
 - **Git Conventions:** Follow Conventional Commits (`feat:`, `fix:`, `refactor:`, etc.).
 - **Architecture (FSD):**

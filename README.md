@@ -6,7 +6,7 @@ lint ép kiến trúc, CI, Docker/nginx có CSP. UI dựng sẵn bằng **shadcn
 thông báo, AlertDialog cho xác nhận.
 
 Stack: Vite, React 19, TypeScript strict, React Router 7 (data router), TanStack Query, axios, react-hook-form + zod,
-Tailwind 4, shadcn/ui (Base UI, `base-nova`), Vitest + jsdom + MSW + Testing Library, ESLint 10, Prettier, Steiger.
+Tailwind 4, shadcn/ui (Base UI, `base-nova`), Vitest + jsdom + MSW + Testing Library, Playwright, ESLint 10, Prettier, Steiger.
 
 Yêu cầu: Node `>=22.13` (xem `.nvmrc`), npm.
 
@@ -38,7 +38,10 @@ hiện.
 | `npm run lint`                    | `eslint .` rồi `steiger ./src` (luật layer FSD)                           |
 | `npm run format` / `format:check` | Prettier ghi / kiểm                                                       |
 | `npm test` / `npm run test:watch` | Vitest (unit + component, API giả bằng MSW)                               |
+| `npm run test:e2e`                | Playwright; tự chạy `npm run dev`, API giả bằng `page.route`              |
 | `npm run verify:example-removal`  | Thử gỡ `example-item` trên bản sao tạm rồi chạy typecheck/lint/test/build |
+
+Lần đầu chạy e2e cần cài trình duyệt: `npx playwright install chromium`.
 
 ## Biến môi trường
 
@@ -120,8 +123,8 @@ lỗi kiểm tra thông tin như sai mật khẩu hiện tại), `isRefreshToken
 3. Nếu thân lỗi không theo RFC 7807 (`code`, `detail`, `errors`), sửa `src/shared/api/problem-json.ts`; mã lỗi chung ở
    `src/shared/api/error-codes.ts`.
 4. Cập nhật test dựng theo hợp đồng mặc định: `signInAs` (`src/test/msw/api.ts`), `makeMeDto`
-   (`src/test/fixtures/user.ts`), và các test giả lập endpoint mặc định
-   (`grep -rln "'/auth/\|'/me'" src`). Test cơ chế chạy với cả hai adapter ở
+   (`src/test/fixtures/user.ts`), `e2e/support/mock-api.ts`, và các test giả lập endpoint mặc định
+   (`grep -rln "'/auth/\|'/me'" src e2e`). Test cơ chế chạy với cả hai adapter ở
    `src/test/auth/adapter-contract.test.ts` và `src/shared/api/auth/auth-contract.test.ts`; thêm adapter mới vào
    mảng `cases` của cả hai.
 
@@ -184,7 +187,7 @@ Chi tiết, danh sách việc làm tay sau đó và cách giữ quy ước marke
 ## Triển khai
 
 - **CI** (`.github/workflows/ci.yml`): push lên `main` và mọi pull request chạy typecheck → lint → format:check → test →
-  build. Đổi nhánh kích hoạt ở khóa `on.push.branches`.
+  build. Đổi nhánh kích hoạt ở khóa `on.push.branches`. CI không chạy e2e.
 - **Image** (`.github/workflows/publish-image.yml`): push tag `v*` build image và đẩy lên
   `ghcr.io/<owner>/<repo>` (tag theo git tag và `latest`), chỉ dùng `GITHUB_TOKEN`.
 - **Docker**: `docker build --build-arg VITE_API_BASE=/api/v1 -t my-app .` rồi `docker run -p 8080:8080 my-app`.
