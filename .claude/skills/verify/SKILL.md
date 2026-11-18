@@ -77,6 +77,10 @@ perform the new interaction, try the failure path, and read screenshots. Stop th
 
 Skip this step when no rendered output changed.
 
+**If the screen was built from a design** (Claude Design artifact, image, mock-up), looking at your
+own screenshot is not enough: you have nothing to compare it to. Run the `verify-design` skill
+(`.claude/skills/verify-design/SKILL.md`) and put its report in yours.
+
 ## 5. Extra checks by what you touched
 
 | You touched | Also run |

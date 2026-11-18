@@ -14,6 +14,7 @@
   - `e2e/` - Playwright specs (API mocked with `page.route` in `e2e/support/mock-api.ts`, visual baselines in `e2e/__screenshots__/`)
   - `.claude/rules/` - Path-scoped rules, auto-loaded only when editing files matching each rule's `paths:` header
   - `.claude/skills/verify/` - The `verify` skill: how to prove a change works (gate, e2e, drive the real app)
+  - `.claude/skills/verify-design/` - The `verify-design` skill: compare a built screen with its design (pixel diff, measured styles, token check); `e2e/support/design-compare.ts` is its helper
   - `docs/` - Code conventions, ADRs (`docs/decisions/`), example-feature removal guide
   - `deploy/`, `Dockerfile`, `.github/workflows/` - nginx config (with CSP), image build, CI and image publishing
   - `scripts/` - `remove-example.mjs` and `verify-example-removal.mjs`

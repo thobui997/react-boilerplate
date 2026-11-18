@@ -22,3 +22,7 @@ test-results/
 
 # Claude Code: cấu hình cục bộ của từng máy (luật chung ở .claude/rules/ được theo dõi)
 .claude/settings.local.json
+
+# verify-design: spec và ảnh tham chiếu tạm (design là dữ liệu riêng, không commit)
+e2e/scratch.spec.ts
+e2e/__screenshots__/scratch.spec.ts/
