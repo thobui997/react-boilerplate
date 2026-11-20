@@ -16,7 +16,7 @@ are on:
 | Design is | Reference you get | Pixel diff | Numbers |
 | --- | --- | --- | --- |
 | A single-page Claude Design artifact (one self-contained HTML page) | HTML you render yourself in Playwright | Yes (step 3) | Yes, both sides (step 4) |
-| A Claude Design canvas (has `project/canvas.json`, many boards) | Screenshot from the in-app browser | No: visual reading only | From the artifact source and tokens, not from the rendered DOM (step 4b) |
+| A Claude Design canvas (has `project/canvas.json`, many boards) | Screenshot from Claude in Chrome | No: visual reading only | From the artifact source and tokens, not from the rendered DOM (step 4b) |
 | An image / PDF from the user | The file | Yes if its size matches | Only what you can read off the image |
 
 ## 1. Get the reference (the design is the source of truth)
@@ -26,21 +26,39 @@ repo; designs are private), render with Playwright (`page.goto('file://...')`) a
 It needs network for Google Fonts, and the font may differ from the app's: check this before
 blaming layout.
 
-**Canvas.** Tested behaviour of the in-app browser (`mcp__Claude_Browser__*`):
+**Canvas.** Use **Claude in Chrome** (`mcp__claude-in-chrome__*`, the user's real Chrome, normally
+already signed in to claude.ai), not the built-in browser pane. The pane is small (one run had it at
+about 514 px wide): the canvas opened at 1% zoom, a double-click on a board did not zoom it, and the
+check was abandoned.
 
-1. `navigate` to the artifact URL. It is usually already signed in. If you land on a sign-in page,
-   ask the user to sign in in the pane; do not enter credentials yourself.
-2. The canvas opens as a zoomed-out overview with boards still drawing (hatched) for several
-   seconds: `wait` first. Double-click a board to open it focused at 100%. The board list and each
-   board's `w`×`h` and state title come from `project/canvas.json` (`Artifact` `read` with `path`).
-3. `computer` `screenshot` returns the image and also saves it as a JPEG under `tool-results/`.
-   That file is **downscaled to the pane (about 1024×768, JPEG)**, not the board's `w`×`h`, so it is
-   fine to *look at* and describe but not to pixel-diff against a Playwright capture.
-4. The board renders inside a cross-origin iframe: `javascript_tool` and `find` cannot read its DOM.
-   Do not promise computed styles from the rendered design.
+1. If the Chrome tools are deferred, load the core set in one `ToolSearch` call (`select:` list from
+   the server instructions: `tabs_context_mcp`, `navigate`, `computer`, `read_page`,
+   `tabs_create_mcp`, `tabs_close_mcp`, plus `resize_window`). Then `tabs_context_mcp`, open a tab
+   with `tabs_create_mcp` and `navigate` to the artifact URL. If you land on a sign-in page, ask the
+   user to sign in in Chrome; do not enter credentials yourself.
+2. Open the board through **Play**, not by zooming the canvas. The canvas opens zoomed out to about
+   1%, and double-clicking or using the hash does not focus a board. Instead:
+   - `resize_window` the window to a large size, for example 1600×1000, then `wait` a few seconds.
+   - Click the ▷ Play button at the top right, next to the zoom indicator. It opens a list:
+     "Prototypes", then "Static artboards" by state title, for example "Danh sách · có dữ liệu".
+   - Click the board you want. It opens alone. Its title is at the top left, and **Fit / Fill** are at
+     the top right; use Fill to make it larger.
+   - Each board's state title and `w`×`h` come from `project/canvas.json` (`Artifact` `read` with
+     `path`).
+3. `computer` `screenshot` shows the page; use `computer` `zoom` on a region to read small details
+   (spacing, icons, copy). A screenshot is a scaled image of the window, not the board's `w`×`h`
+   pixels, so it is for *looking at* and describing, not for pixel-diffing against a Playwright
+   capture.
+4. The board renders inside a cross-origin iframe: `javascript_tool` and `find` cannot read its DOM
+   (established in the built-in pane; assume the same in Chrome). Do not promise computed styles
+   from the rendered design.
 
-If the pane cannot show the board (sign-in blocked, board will not open), ask the user to export
-the board as an image and send it; say that you could not verify without it.
+Only if Claude in Chrome is not connected, fall back to the built-in pane (`mcp__Claude_Browser__*`):
+`navigate`, `wait`, then `resize_window` and the zoom control before any screenshot, and expect to
+need the export below.
+
+If neither can show the board (sign-in blocked, board will not open), ask the user to export the
+board as an image and send it; say that you could not verify without it.
 
 Read what the design says outside the picture too: the screens × states it shows (empty, loading,
 error, hover, focus, dark, tablet, mobile), the tokens, spacing and copy. Write that list; a design
