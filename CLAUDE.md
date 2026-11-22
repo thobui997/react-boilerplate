@@ -2,7 +2,7 @@
 
 ## Project Overview (WHAT & WHY)
 
-- **Purpose:** Reusable SPA template for authenticated apps that call a backend API (internal tools, dashboards, admin panels). Auth, routing guards, HTTP client, FSD structure, architecture linting, CI, and a hardened Docker/nginx image come pre-built and tested.
+- **Purpose:** TODO: replace this line with one or two sentences on what this app does and for whom.
 - **Tech Stack:** Vite, React 19, TypeScript (strict), React Router 7 (data router), TanStack Query, axios, react-hook-form + zod, Tailwind 4, shadcn/ui on Base UI, Vitest + jsdom + MSW + Testing Library, fast-check (property tests), Playwright (e2e), ESLint, Prettier, Steiger (FSD lint), Docker + nginx. Node `>=22.13`.
 - **Repo Map:**
   - `src/app/` - Composition root: providers, router (routes, guard loaders, session-event wiring), layouts, navigation, styles
