@@ -3,7 +3,7 @@
 //
 //   node scripts/remove-example.mjs [rootDir]
 //
-// 1. Xóa các thư mục/file chỉ thuộc tính năng mẫu (EXAMPLE_PATHS).
+// 1. Xóa các thư mục/file chỉ thuộc tính năng mẫu và tài liệu thiết kế của template `docs/superpowers/` (EXAMPLE_PATHS).
 // 2. Cắt mọi đoạn nằm giữa hai dòng marker `// <example-item>` … `// </example-item>` (gồm cả hai dòng marker)
 //    trong file .ts/.tsx/.js/.jsx/.mjs ở `src/`, `e2e/` và `steiger.config.ts`.
 // 3. Chạy Prettier của repo trên các file đã sửa (cắt xong có thể còn `{\n}` hay `[\n]` thừa dòng).
@@ -22,6 +22,7 @@ const EXAMPLE_PATHS = [
   'src/test/msw/example-items.ts',
   'e2e/example-items.spec.ts',
   'e2e/support/example-items-mock.ts',
+  'docs/superpowers',
 ]
 const SCAN_DIRS = ['src', 'e2e']
 const SCAN_FILES = ['steiger.config.ts']
