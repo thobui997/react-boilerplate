@@ -1,14 +1,26 @@
 ---
 name: verify-design
-description: Check that a UI built in this repo matches its design (usually a Claude Design artifact, otherwise an exported image). Gets the design as the reference, captures the built screen at the same size and state, then compares it and reports each mismatch with numbers where the design allows them. Use after building or changing any screen, dialog or component from a design, before saying the UI is done, or when told the result "does not look like the design".
+description: Check that a UI built in this repo matches its design (usually a Claude Design artifact, otherwise an exported image). Gets the design as the reference, captures the built screen at the same size and state, then compares it and reports each mismatch with numbers where the design allows them. Use as soon as the user gives a design link (step 0 and 1, before writing UI code), after building or changing any screen, dialog or component from a design, before saying the UI is done, or when told the result "does not look like the design".
 ---
 
 # Verify design
 
 "Looks fine to me" is not verification: the usual failure is a build that is close but wrong in
 spacing, size, colour, radius, font or states. Compare against the design with images and numbers,
-not by eye from memory. Run this after `verify` step 3 passes (the flows must work first), and keep
-to the rules at the end.
+not by eye from memory. Run the comparison (step 2 onward) after `verify` step 3 passes (the flows
+must work first), and keep to the rules at the end.
+
+## 0. See the design before building
+
+When the user gives a design link, do step 1 first, before writing or changing UI code: open it in
+a browser and look at the screenshots of every screen and state you will build. Reading the design's
+source or structure (`Artifact read`, `canvas.json`, HTML) is for numbers and tokens only; it is
+not "seeing the design", and you must not describe the design from it alone.
+
+If the design cannot be opened (Claude in Chrome not connected, sign-in page, board will not open),
+stop and tell the user which of these happened. Ask them to connect Chrome, sign in, or export the
+board as an image. Do not continue from the source alone, and do not say you looked at the design.
+In your first message about the task, say which screens and states you viewed.
 
 What you can measure depends on the kind of design. Decide first, and tell the user which path you
 are on:
@@ -63,12 +75,11 @@ check was abandoned.
    (established in the built-in pane; assume the same in Chrome). Do not promise computed styles
    from the rendered design.
 
-Only if Claude in Chrome is not connected, fall back to the built-in pane (`mcp__Claude_Browser__*`):
-`navigate`, `wait`, then `resize_window` and the zoom control before any screenshot, and expect to
-need the export below.
-
-If neither can show the board (sign-in blocked, board will not open), ask the user to export the
-board as an image and send it; say that you could not verify without it.
+If Claude in Chrome is not connected, or it cannot show the board (sign-in blocked, board will not
+open), stop and ask the user: connect Chrome, sign in, use the built-in pane
+(`mcp__Claude_Browser__*`, small and unreliable for canvases: `navigate`, `wait`, then
+`resize_window` and the zoom control before any screenshot), or export the board as an image and
+send it. Say that you could not verify without one of these. Do not switch browsers on your own.
 
 Read what the design says outside the picture too: the screens × states it shows (empty, loading,
 error, hover, focus, dark, tablet, mobile), the tokens, spacing and copy. Write that list; a design
