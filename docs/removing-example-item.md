@@ -18,7 +18,8 @@ Script:
    đóng, marker đóng thừa, marker lồng nhau, hay marker không đứng riêng một dòng comment `//` làm script dừng với
    lỗi (kèm file:dòng) **trước khi sửa bất cứ file nào**.
 2. Xóa `src/entities/example-item/`, `src/pages/example-items/`, `src/test/msw/example-items.ts`,
-   `e2e/example-items.spec.ts` và `e2e/support/example-items-mock.ts`.
+   `e2e/example-items.spec.ts`, `e2e/support/example-items-mock.ts` và thư mục `docs/superpowers/` (kế hoạch và
+   thiết kế của template).
 3. Cắt mọi đoạn từ dòng `// <example-item>` đến dòng `// </example-item>` (gồm cả hai dòng marker).
 4. Chạy Prettier của repo trên các file vừa sửa (cắt xong có thể còn `{\n}` hay `[\n]` thừa dòng).
 5. In ra từng thứ đã xóa và từng file đã cắt (số khối, khoảng dòng).
