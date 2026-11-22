@@ -51,7 +51,7 @@
 - **Language:** Project docs are in Vietnamese; identifiers in code are in English.
 - **Template Maintenance:**
   - `src/test/no-domain-traces.test.ts` guards against leftover domain keywords from the source project (it scans `.claude/` and this file); projects created from the template may delete it.
-  - Do not edit `docs/superpowers/` or `.superpowers/`.
+  - Do not edit `.superpowers/`.
   - If you change `STORAGE_PREFIX`, also update `public/theme-init.js` (`src/shared/config/storage-keys.test.ts` enforces this).
   - The CSP in `deploy/nginx.conf` is enforced by `src/test/deploy-config.test.ts`: change both together.
   - Example feature code is wrapped in `// <example-item>` markers; see `docs/removing-example-item.md` and run `npm run verify:example-removal` after touching them.
