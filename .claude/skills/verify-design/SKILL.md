@@ -36,15 +36,25 @@ check was abandoned.
    `tabs_create_mcp`, `tabs_close_mcp`, plus `resize_window`). Then `tabs_context_mcp`, open a tab
    with `tabs_create_mcp` and `navigate` to the artifact URL. If you land on a sign-in page, ask the
    user to sign in in Chrome; do not enter credentials yourself.
-2. Open the board through **Play**, not by zooming the canvas. The canvas opens zoomed out to about
-   1%, and double-clicking or using the hash does not focus a board. Instead:
+2. **Work in the interactive prototype, not on the canvas.** The canvas opens zoomed out to about
+   1%, and double-clicking or using the hash does not focus a board, so never try to zoom it or hunt
+   for a board on it. Enter prototype mode once, then move between screens by using the prototype
+   like a user (click its own buttons, links and menu items):
    - `resize_window` the window to a large size, for example 1600×1000, then `wait` a few seconds.
-   - Click the ▷ Play button at the top right, next to the zoom indicator. It opens a list:
-     "Prototypes", then "Static artboards" by state title, for example "Danh sách · có dữ liệu".
-   - Click the board you want. It opens alone. Its title is at the top left, and **Fit / Fill** are at
-     the top right; use Fill to make it larger.
-   - Each board's state title and `w`×`h` come from `project/canvas.json` (`Artifact` `read` with
-     `path`).
+   - Click the ▷ Play button at the top right, next to the zoom indicator, then pick the first entry
+     under "Prototypes". That is the only Play click you need: do not open the list again to look for
+     each screen. The prototype opens alone. **Fit / Fill** are at the top right; use Fill to make it
+     larger.
+   - Reach each screen on your list by interacting inside the prototype (sign in, open a menu, open a
+     dialog). Take the screenshot (step 3) on each screen as you arrive.
+   - Fall back to "Static artboards" in the same Play list **only** for a state the prototype flow
+     cannot reach (empty, loading, error, dark, tablet, mobile, a dialog with no trigger). Pick the
+     board by its state title, for example "Danh sách · có dữ liệu". If there is no "Prototypes"
+     entry at all, use the artboards for everything.
+   - A board's state title and `w`×`h` come from `project/canvas.json` (`Artifact` `read` with
+     `path`). In prototype mode the screen is sized by the window, not by the board, so set the
+     build's viewport to the same window size (or the board's `w`×`h` when you compare against an
+     artboard) before capturing in step 2.
 3. `computer` `screenshot` shows the page; use `computer` `zoom` on a region to read small details
    (spacing, icons, copy). A screenshot is a scaled image of the window, not the board's `w`×`h`
    pixels, so it is for *looking at* and describing, not for pixel-diffing against a Playwright
@@ -153,7 +163,8 @@ best guess for the cause.
 ## Report (end with this)
 
 - Path used (single page, canvas or image) and the reference (artifact URL and board, or file), with
-  the viewport and state compared.
+  the viewport and state compared. For a canvas, say for each screen whether it came from the
+  prototype or from a static artboard.
 - A table: element · design · build · fixed? Include mismatches you found, not only those you fixed.
 - Pixel diff ratio and what the diff image showed (single page), or the region-by-region list
   (canvas), saying which it was.
