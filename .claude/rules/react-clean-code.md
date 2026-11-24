@@ -94,32 +94,10 @@ When principles conflict, choose the option that is simplest to read and change.
 - Do not pass `null` around as a control signal; model absence with explicit types.
 - Fail fast on impossible states. Exhaustive `switch` with `never` checks on unions.
 
-## 7. SOLID in React
-
-| Principle | In React |
-|---|---|
-| **S**ingle Responsibility | One reason to change per component or hook. Split UI, state logic and data access. |
-| **O**pen/Closed | Extend through composition, `children`, slots and props, not by editing a component for every new variant. |
-| **L**iskov Substitution | A component accepting native input props must still behave like that element. Forward native attributes. Do not break the contract. |
-| **I**nterface Segregation | Pass only the props a component uses. Do not hand it a whole `user` object for one field. |
-| **D**ependency Inversion | Depend on abstractions: inject services and callbacks through props, context, hooks or ports (`AuthAdapter`, `setNotifier`), not hard-coded imports in UI components. |
-
-## 8. DRY, KISS, YAGNI
-
-- **DRY.** Remove duplicated *knowledge* (rules, mappings, constants), not just
-  duplicated lines. Wait for the third occurrence before abstracting. A wrong
-  abstraction costs more than duplication.
-- **KISS.** Choose the simplest design that works. No custom hook, context or
-  pattern without a concrete need.
-- **YAGNI.** Do not build for hypothetical requirements. No unused props, options
-  or generic abstractions.
-- Delete dead code and unused exports.
-
-## 9. Tests
+## 7. Tests
 
 - Tests are first-class code; keep them as clean as production code. Put them
   next to the code (`*.test.ts[x]`); shared test infrastructure lives in `src/test/`.
-- **F.I.R.S.T.**: Fast, Independent, Repeatable, Self-validating, Timely.
 - Test behavior the user sees (roles, text, interactions), not implementation
   details. Mock the API with MSW (`src/test/msw`) and render pages with
   `renderRoute` (`src/test/render.tsx`).
@@ -139,25 +117,16 @@ When principles conflict, choose the option that is simplest to read and change.
   weaken the property just to get green. Check a new property by temporarily breaking the code and
   confirming it fails.
 
-## 10. Boy Scout Rule and refactoring
-
-- Leave the code cleaner than you found it, in small, safe steps tied to the
-  task at hand.
-- Refactor with passing tests and no behavior change, and keep refactor commits
-  separate from feature commits.
-- Do not rewrite unrelated code in the same change.
-
-## 11. Rules for AI agents
+## 8. Rules for AI agents
 
 1. Before writing code, name the responsibility of each function or component in
    one sentence. If it needs "and", split it.
 2. Match the surrounding code's naming, structure and patterns before introducing new ones.
 3. Do not add abstractions, props, options or comments that the task does not require.
-4. When modifying code, apply the Boy Scout Rule only to the code you touch.
-5. After editing, run `npm run typecheck && npm run lint && npm run format:check && npm test`
+4. After editing, run `npm run typecheck && npm run lint && npm run format:check && npm test`
    and report any failure.
 
-## 12. Review checklist
+## 9. Review checklist
 
 - [ ] Names reveal intent; no magic values; UI strings in `messages.vi.ts`
 - [ ] Each function and component does one thing at one abstraction level
@@ -165,5 +134,4 @@ When principles conflict, choose the option that is simplest to read and change.
 - [ ] No flag props, no needless mirrored state, no prop sprawl
 - [ ] Comments explain why; no dead or commented-out code
 - [ ] Errors, loading and empty states are handled explicitly
-- [ ] No duplicated knowledge; no speculative abstraction
 - [ ] Behavior is covered by tests that read clearly

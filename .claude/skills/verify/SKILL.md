@@ -87,9 +87,8 @@ own screenshot is not enough: you have nothing to compare it to. Run the `verify
 | You touched | Also run |
 | --- | --- |
 | Anything between `// <example-item>` markers, `example-items` code, `src/test/msw/example-items.ts`, `e2e/example-items*` | `npm run verify:example-removal` (slow: copies the repo, removes the sample, runs the whole gate and build there) |
-| `STORAGE_PREFIX` | also edit `public/theme-init.js`; `storage-keys.test.ts` enforces it |
-| CSP in `deploy/nginx.conf` | change `src/test/deploy-config.test.ts` together; both must pass |
-| Guards or `landingPathFor` | `auth` and `change-password` e2e specs; every landing path must be reachable without missing permissions or the redirect loops |
+| `STORAGE_PREFIX`, or the CSP in `deploy/nginx.conf` | the files that change together and the tests that enforce it: `.claude/rules/template-coupling.md` |
+| Guards or `landingPathFor` | `auth` and `change-password` e2e specs (invariants: `.claude/rules/routing-access.md`) |
 | `safeRedirect`, `landingPathFor`, route guards or `Permissions`, `evaluatePasswordPolicy` | Their property tests (`safe-redirect.property`, `landing-reachability.property`, `password-policy.property`) run in `npm test`: read a failure's counterexample, fix the code, add it as a plain example test. Never narrow the generator. Adding another pure function with an invariant? Add a property test and break the code once to see it fail. |
 | `AuthAdapter` contract or endpoints | update `signInAs`, `makeMeDto` and `e2e/support/mock-api.ts` (see `.claude/rules/auth-adapter.md`) |
 | `src/shared/i18n/messages.vi.ts` | e2e locates elements by these strings; run e2e and refresh `visual` baselines if copy changed |

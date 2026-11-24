@@ -39,9 +39,8 @@ It needs network for Google Fonts, and the font may differ from the app's: check
 blaming layout.
 
 **Canvas.** Use **Claude in Chrome** (`mcp__claude-in-chrome__*`, the user's real Chrome, normally
-already signed in to claude.ai), not the built-in browser pane. The pane is small (one run had it at
-about 514 px wide): the canvas opened at 1% zoom, a double-click on a board did not zoom it, and the
-check was abandoned.
+already signed in to claude.ai), not the built-in browser pane, which is too small to show a canvas
+board at a readable size.
 
 1. If the Chrome tools are deferred, load the core set in one `ToolSearch` call (`select:` list from
    the server instructions: `tabs_context_mcp`, `navigate`, `computer`, `read_page`,
@@ -71,9 +70,8 @@ check was abandoned.
    (spacing, icons, copy). A screenshot is a scaled image of the window, not the board's `w`×`h`
    pixels, so it is for *looking at* and describing, not for pixel-diffing against a Playwright
    capture.
-4. The board renders inside a cross-origin iframe: `javascript_tool` and `find` cannot read its DOM
-   (established in the built-in pane; assume the same in Chrome). Do not promise computed styles
-   from the rendered design.
+4. The board renders inside a cross-origin iframe: `javascript_tool` and `find` cannot read its DOM.
+   Do not promise computed styles from the rendered design.
 
 If Claude in Chrome is not connected, or it cannot show the board (sign-in blocked, board will not
 open), stop and ask the user: connect Chrome, sign in, use the built-in pane
@@ -137,8 +135,7 @@ console.log(issues.join('\n') || 'khớp')
 Targets are found by accessible role and name, so choose the ones that matter: headings, inputs,
 buttons, cards, table headers. It reports position and size beyond 1 px, and any difference in
 colour (normalised to rgb, so a design's hex and the app's oklch compare fairly), font size,
-weight, line height, radius, border, padding, gap and shadow. Verified on this repo: identical
-pages give no issues, an injected radius, colour or font size is reported.
+weight, line height, radius, border, padding, gap and shadow.
 
 **4b. Canvas.** Numbers come from the source, not the render: `Artifact` `read` the design system
 (`project/ds/<ns>/tokens.json`, `tokens.css`, `components/bundle.css`) and the board's own file or
@@ -158,7 +155,7 @@ git add -N . && git diff -U0 HEAD -- 'src/**/*.tsx' 'src/**/*.css' | grep -nE '^
 ```
 
 (`git add -N` only marks new files so `git diff` can see them; `git reset -q` at the end undoes it
-and keeps your changes. Checked on a new untracked file containing `#ff0000`: it is reported.)
+and keeps your changes.)
 
 Each hit is a hard-coded value. Use a token from `src/app/styles/index.css` or a `shared/ui`
 component instead. If the design uses a value the app has no token for, say so and ask before adding
