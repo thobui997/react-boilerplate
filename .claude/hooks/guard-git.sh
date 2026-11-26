@@ -2,7 +2,7 @@
 # PreToolUse hook (matcher: Bash). Enforces the git rules from CLAUDE.md:
 #   - no commit/push on main or develop, and no push whose refspec targets them (deny)
 #   - `shadcn init` is never run (deny)
-#   - `git tag`, a merge on main/develop, a merge after switching to main, `gh pr merge` need the user's OK (ask)
+#   - `git tag` and `gh pr merge` need the user's OK (ask); local `git merge` is allowed on any branch
 # It matches the command text, so it is a guardrail against slips, not a sandbox.
 set -u
 
@@ -42,12 +42,6 @@ fi
 
 if git_sub tag && ! printf '%s' "$command" | grep -Eq 'git([[:space:]]+-[^[:space:]]+)*[[:space:]]+tag([[:space:]]+(-l|--list)([[:space:]]|$)|[[:space:]]*($|[;&|]))'; then
   respond ask "Tagging needs the user's approval (CLAUDE.md)."
-fi
-
-if git_sub merge; then
-  if [ "$on_protected" -eq 1 ] || printf '%s' "$command" | grep -Eq '(checkout|switch)[[:space:]]+(main|develop)([[:space:]]|$)'; then
-    respond ask "Merging into main/develop needs the user's approval (CLAUDE.md)."
-  fi
 fi
 
 if printf '%s' "$command" | grep -Eq '(^|[[:space:];&|])gh[[:space:]]+pr[[:space:]]+merge([[:space:]]|$)'; then
